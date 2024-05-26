@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="links">
     <router-link to="/welcome">Welcome</router-link>
     <router-link to="/home">Home</router-link>
     <router-link to="/signup">Signup</router-link>
@@ -15,12 +15,18 @@ export default {
 };
 </script>
 
-<style scoped>
-div {
+<style>
+.links {
   display: flex;
-  gap: 10px;
-  justify-content: center;
+  justify-content: space-around;
+  font-family: 'Helvetica';
+  margin: 0;
+  padding: 0;
   align-items: center;
-  margin-top: 20px;
 }
+  body {
+    font-family: 'Helvetica';
+    margin: 0;
+    padding: 0;
+  }
 </style>
