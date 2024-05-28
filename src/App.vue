@@ -5,6 +5,8 @@
     <router-link to="/signup">Signup</router-link>
     <router-link to="/login">Login</router-link>
     <router-link to="/profile">Profile</router-link>
+    <router-link to="/leaderboard">Leaderboard</router-link>
+    <router-link to="/createquiz">Create Quiz</router-link>
   </div>
   <router-view/>
 </template>

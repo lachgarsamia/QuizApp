@@ -1,15 +1,8 @@
 <template>
   <div class="container-fluid p-0">
-    <!-- Header Section -->
-    <header class="d-flex justify-content-between align-items-center p-4 bg-dark text-white">
-      <img src="@/assets/logo-OYJ34ERC.png" alt="QuizzApp Logo" class="logo">
-      <router-link to="/signup">
-        <button class="btn btn-outline-light btn-lg">Sign Up</button>
-      </router-link>
-    </header>
-
     <!-- Hero Section -->
-    <section class="hero d-flex flex-column align-items-center justify-content-center text-center text-white position-relative">
+    <section class="hero d-flex flex-column align-items-center justify-content-center text-center text-white position-relative w-100">
+      <img src="@/assets/logo-OYJ34ERC.png" alt="QuizzApp Logo" class="logo mb-4">
       <div class="hero-content">
         <h1 class="display-3 fw-bold" editable="inline">Welcome to QuizzApp</h1>
         <p class="lead" editable="inline">Test your knowledge with our engaging quizzes!</p>
@@ -49,21 +42,27 @@
         <div class="row text-center">
           <div class="col-md-4 mb-4">
             <div class="feature-icon mb-3">
-              <i class="bi bi-lightbulb-fill"></i>
+              <div class="oval">
+                <i class="fas fa-book"></i>
+              </div>
             </div>
             <h4 editable="inline">Engaging Quizzes</h4>
             <p class="text-muted" editable="inline">Discover a wide variety of quizzes across different topics.</p>
           </div>
           <div class="col-md-4 mb-4">
             <div class="feature-icon mb-3">
-              <i class="bi bi-trophy-fill"></i>
+              <div class="oval">
+                <i class="fas fa-gamepad"></i>
+              </div>
             </div>
             <h4 editable="inline">Competitive Fun</h4>
             <p class="text-muted" editable="inline">Compete with friends and climb the leaderboard.</p>
           </div>
           <div class="col-md-4 mb-4">
             <div class="feature-icon mb-3">
-              <i class="bi bi-people-fill"></i>
+              <div class="oval">
+                <i class="fas fa-handshake"></i>
+              </div>
             </div>
             <h4 editable="inline">Community Driven</h4>
             <p class="text-muted" editable="inline">Join a community of quiz enthusiasts.</p>
@@ -148,33 +147,11 @@ body {
   padding: 0;
 }
 
-/* Header Styling */
-header {
-  background-color: #212529;
-  padding: 1rem 2rem;
-  z-index: 10;
-  position: relative;
-}
-
-.logo {
-  width: 80px;
-  height: auto;
-}
-
-.btn-outline-light {
-  border: 2px solid #fff;
-}
-
-.btn-outline-light:hover {
-  background-color: #fff;
-  color: #212529;
-}
-
 /* Hero Section */
 .hero {
   height: 80vh;
-  background: linear-gradient(45deg, #ff6ec4, #7873f5);
-  clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%);
+  background: linear-gradient(15deg, #ff6ec4, #7873f5);
+  clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
   color: white;
   display: flex;
   flex-direction: column;
@@ -182,12 +159,18 @@ header {
   align-items: center;
   text-align: center;
   z-index: 5;
-  padding: 2rem;
-  width: 50%;
+  padding: 3%;
+  width: 100%;
 }
 
 .hero-content {
   max-width: 90%; /* Increased width */
+}
+
+.logo {
+  width: 100px;
+  height: auto;
+  margin-bottom: 1rem; /* Added margin to separate from the welcome message */
 }
 
 .hero h1 {
@@ -219,7 +202,7 @@ header {
 }
 
 .swiper-container-wrapper {
-  max-width: 80%;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -287,6 +270,7 @@ header {
 /* Features Section */
 .features {
   background-color: #f8f9fa;
+  padding: 3rem 0;
 }
 
 .feature-icon {
@@ -295,10 +279,39 @@ header {
   border-radius: 50%;
   background: linear-gradient(45deg, #ff6ec4, #7873f5);
   color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 1rem auto;
+  position: relative;
 }
 
-.feature-icon i {
+.feature-icon .oval {
+  width: 100px;
+  height: 50px;
+  background: linear-gradient(45deg, #ff6ec4, #7873f5);
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50px / 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon .oval i {
+  color: white;
   font-size: 2rem;
+}
+
+.features .col-md-4 {
+  margin-bottom: 1rem;
+}
+
+.features h4 {
+  margin-bottom: 0.5rem;
 }
 
 /* Footer Section */
@@ -306,5 +319,68 @@ footer {
   background-color: #212529;
   color: #fff;
   padding: 1rem 0;
+}
+
+/* Responsive Styling */
+@media (max-width: 767px) {
+  .hero {
+    height: auto;
+    padding: 5rem 1rem;
+  }
+
+  .hero h1 {
+    font-size: 2.5rem;
+  }
+
+  .hero p {
+    font-size: 1.25rem;
+  }
+
+  .hero button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+  }
+
+  .swiper-slide {
+    width: 100%;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .hero h1 {
+    font-size: 3.5rem;
+  }
+
+  .hero p {
+    font-size: 1.25rem;
+  }
+
+  .hero button {
+    padding: 0.5rem 1.25rem;
+    font-size: 1.15rem;
+  }
+
+  .swiper-slide {
+    width: 50%;
+  }
+}
+
+@media (min-width: 992px) {
+  .hero h1 {
+    font-size: 4rem;
+  }
+
+  .hero p {
+    font-size: 1.5rem;
+  }
+
+  .hero button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.25rem;
+  }
+
+  .swiper-slide {
+    width: 33.333%;
+  }
 }
 </style>
