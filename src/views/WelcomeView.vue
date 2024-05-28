@@ -4,6 +4,7 @@
     <section class="hero d-flex flex-column align-items-center justify-content-center text-center text-white position-relative w-100">
       <img src="@/assets/logo-OYJ34ERC.png" alt="QuizzApp Logo" class="logo mb-4">
       <div class="hero-content">
+        <img src="@/assets/logo-OYJ34ERC.png" alt="QuizzApp Logo" class="logo mb-4">
         <h1 class="display-3 fw-bold" editable="inline">Welcome to QuizzApp</h1>
         <p class="lead" editable="inline">Test your knowledge with our engaging quizzes!</p>
         <router-link to="/start-quiz">
@@ -73,6 +74,7 @@
 
     <!-- Footer Section -->
     <footer class="text-center py-4 bg-dark text-white">
+      <img src="@/assets/logo-OYJ34ERC.png" alt="QuizzApp Logo" class="logo mb-2">
       <p editable="inline">&copy; 2024 QuizzApp. All rights reserved.</p>
     </footer>
   </div>
@@ -147,6 +149,28 @@ body {
   padding: 0;
 }
 
+/* Header Styling */
+header {
+  background-color: #212529;
+  padding: 1rem 2rem;
+  z-index: 10;
+  position: relative;
+}
+
+.logo {
+  width: 80px;
+  height: auto;
+}
+
+.btn-outline-light {
+  border: 2px solid #fff;
+}
+
+.btn-outline-light:hover {
+  background-color: #fff;
+  color: #212529;
+}
+
 /* Hero Section */
 .hero {
   height: 80vh;
@@ -164,7 +188,13 @@ body {
 }
 
 .hero-content {
-  max-width: 90%; /* Increased width */
+  max-width: 90%; 
+}
+
+.logo {
+  width: 100px;
+  height: auto;
+  margin-bottom: 1rem; /* Added margin to separate from the welcome message */
 }
 
 .logo {
@@ -195,13 +225,13 @@ body {
   transform: scale(1.05);
 }
 
-/* Swiper Section */
 .quizzes {
   padding: 3rem 0;
   background-color: #f8f9fa;
 }
 
 .swiper-container-wrapper {
+  max-width: 100%;
   max-width: 100%;
   margin: 0 auto;
 }
@@ -267,7 +297,6 @@ body {
   background-color: rgba(255, 255, 255, 1);
 }
 
-/* Features Section */
 .features {
   background-color: #f8f9fa;
   padding: 3rem 0;
@@ -314,7 +343,14 @@ body {
   margin-bottom: 0.5rem;
 }
 
-/* Footer Section */
+.features .col-md-4 {
+  margin-bottom: 1rem;
+}
+
+.features h4 {
+  margin-bottom: 0.5rem;
+}
+
 footer {
   background-color: #212529;
   color: #fff;

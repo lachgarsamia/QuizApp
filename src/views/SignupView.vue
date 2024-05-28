@@ -3,6 +3,7 @@
     <h2>Sign Up</h2>
     <form @submit.prevent="signUp">
       <input type="text" v-model="username" placeholder="Username" />
+      <input type="text" v-model="username" placeholder="Username" />
       <input type="email" v-model="email" placeholder="Email" required />
       <input type="password" v-model="password" placeholder="Password" required />
       <button type="submit">Sign Up</button>
