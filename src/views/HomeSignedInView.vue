@@ -3,20 +3,19 @@
   <div class="home-container">
     <div class="home-panel">
       <h2 class="home-title">Trending quizzes in your feed</h2>
-      <router-link to="/createquiz" v-if="isAdmin" class="create-form-btn">Create New</router-link </div>
+      <router-link to="/createquiz" v-if="isAdmin" class="create-form-btn">Create New</router-link>
     </div>
     <div class="quizzes-container">
-      <div v-for="(quiz, index) in quizzes" :key="index" class="quiz-card" @mouseenter="quizhover"
-        @mouseleave="(event) => quizregular(event, index)">
+      <router-link v-for="(quiz, index) in quizzes" :key="index" :to="{ name: 'quiz', params: { questionIndex: 0 } }" class="quiz-card">
         <div class="quiz-title">{{ quiz.title }}</div>
         <img :src="quiz.url" class="quiz-image" />
-      </div>
+      </router-link>
     </div>
   </div>
 </template>
 
 <script>
-import NavbarSignedin from "@/components/NavbarSignedin.vue";
+import NavbarSignedin from "@/components/NavbarSignedin.vue"; 
 
 export default {
   name: "HomeSignedInView",
@@ -35,7 +34,7 @@ export default {
         { id: 7, title: "Poetry Quiz", url: require("@/assets/think.jpg") },
         { id: 8, title: "Arts Quiz", url: require("@/assets/tomobil.jpg") },
       ],
-      isAdmin: true, // Set this based on the actual user role
+      isAdmin: true, 
     };
   },
   methods: {
@@ -50,13 +49,9 @@ export default {
       event.target.querySelector(".quiz-title").textContent =
         this.quizzes[idx].title;
       event.target.querySelector(".quiz-image").style.display = "block";
-      event.target.querySelector(".quiz-title").style.mixBlendMode =
-        "difference";
+      event.target.querySelector(".quiz-title").style.mixBlendMode = "difference";
       event.target.style.background = "#fefefe";
-    },
-    goToCreateForm() {
-      this.$router.push({ name: "CreateQuiz" }); // Ensure the route name is correct
-    },
+    }
   },
 };
 </script>
@@ -76,7 +71,7 @@ export default {
   margin: 10px 30px 20px 30px;
 }
 
-.home-panel{
+.home-panel {
   display: flex;
   align-items: baseline;
 }

@@ -1,12 +1,12 @@
 <template>
-    <div id="leaderboard-container">
-        <h1>Leaderboard</h1>
-        <table>
-            <thead>
+    <div id="leaderboard-container" class="container mt-5 p-4 rounded shadow">
+        <h1 class="text-center">Leaderboard</h1>
+        <table class="table table-striped table-hover">
+            <thead class="thead-dark">
                 <tr>
-                    <th>Rank</th>
-                    <th>Name</th>
-                    <th>Score</th>
+                    <th scope="col">Rank</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Score</th>
                 </tr>
             </thead>
             <tbody>
@@ -19,6 +19,7 @@
         </table>
     </div>
 </template>
+
 <script>
 export default {
     data() {
@@ -43,15 +44,16 @@ export default {
     },
 };
 </script>
+
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
 :root {
-    --primary-color: #4a86f9; /* Dominant color (Blue) */
-    --secondary-color: #ef5cda; /* Complementary color 1 (Pink) */
-    --tertiary-color: #4b84e1; /* Complementary color 2 (Dark Blue) */
-    --quaternary-color: #f27b5c; /* Complementary color 3 (Orange) */
-    --quinary-color: #ab4be1; /* Complementary color 4 (Purple) */
+    --primary-color: #4a86f9;
+    --secondary-color: #ef5cda;
+    --tertiary-color: #4b84e1;
+    --quaternary-color: #f27b5c;
+    --quinary-color: #ab4be1;
     --background-color: #ffffff;
     --text-color: #333333;
     --border-color: #dddddd;
@@ -60,12 +62,9 @@ export default {
 }
 
 #leaderboard-container {
-    width: 80%;
-    margin: 0 auto;
-    padding: 20px;
     font-family: 'Roboto', sans-serif;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--tertiary-color));
-    border: 1px solid var(--border-color);
+    color: var(--text-color);
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     animation: fadeIn var(--transition-duration) ease-in-out;
@@ -77,7 +76,6 @@ export default {
 }
 
 h1 {
-    text-align: center;
     color: var(--background-color);
     font-weight: 500;
     margin-bottom: 20px;
@@ -89,51 +87,47 @@ h1 {
     to { transform: translateY(0); opacity: 1; }
 }
 
-table {
+.table {
     width: 100%;
     border-collapse: collapse;
-    animation: fadeIn var(--transition-duration) ease-in-out;
+    margin-bottom: 0;
 }
 
-th, td {
+.table th, .table td {
     padding: 10px;
     text-align: left;
-    border-bottom: 1px solid var(--border-color);
     transition: background-color var(--transition-duration), color var(--transition-duration);
 }
 
-th {
+.table thead {
     background-color: var(--primary-color);
     color: #fff;
+}
+
+.table thead th {
     text-align: center;
-    cursor: pointer;
 }
 
-th:hover {
-    background-color: var(--secondary-color);
-}
-
-tr:nth-child(even) {
+.table tbody tr:nth-child(even) {
     background-color: var(--hover-color);
 }
 
-tr:hover {
+.table tbody tr:hover {
     background-color: var(--quaternary-color);
     color: #fff;
     transform: scale(1.02);
 }
 
-tr td:first-child {
+.table tbody tr td:first-child {
     text-align: center;
     font-weight: bold;
 }
 
-tbody tr:hover td {
+.table tbody tr:hover td {
     color: #fff;
 }
 
-tr {
+.table tbody tr {
     transition: transform var(--transition-duration), background-color var(--transition-duration), color var(--transition-duration);
 }
-
 </style>

@@ -1,18 +1,22 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/firestore";
+import "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
+    apiKey: "AIzaSyAQJcYt0CZ3utOidnpyzDKF94cWUV3WRXg",
+    authDomain: "quizz-app-a108c.firebaseapp.com",
+    projectId: "quizz-app-a108c",
+    storageBucket: "quizz-app-a108c.appspot.com",
+    messagingSenderId: "807063003420",
+    appId: "1:807063003420:web:55a409bbf0cc4c97cc1ad9",
+    measurementId: "G-BHE911JVYQ"
+  };
+  
+  
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const storage = firebase.storage();
+  const app = firebase.firestore();
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-export { auth, db };
+export { auth, app, storage};

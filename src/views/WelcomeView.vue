@@ -6,8 +6,8 @@
       <div class="hero-content">
         <h1 class="display-3 fw-bold" editable="inline">Welcome to QuizzApp</h1>
         <p class="lead" editable="inline">Test your knowledge with our engaging quizzes!</p>
-        <router-link to="/start-quiz">
-          <button class="btn btn-primary btn-lg mt-4">Start Quiz</button>
+        <router-link to="/signup">
+          <button class="btn btn-primary btn-lg mt-4">Get Started</button>
         </router-link>
       </div>
     </section>

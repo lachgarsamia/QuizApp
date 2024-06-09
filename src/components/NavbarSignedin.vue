@@ -14,15 +14,22 @@
             </div>
             <button class="browse-btn">Browse</button>
         </div>
-        <router-link to="profile" class="account-desktop">Account</router-link>
-        <router-link to="profile"><font-awesome-icon :icon="['fas', 'user']" class="account-phone" /></router-link>
+        <router-link :to="`profile/${userid}`" class="account-desktop">Account</router-link>
+        <router-link :to="`profile/${userid}`"><font-awesome-icon :icon="['fas', 'user']"
+                class="account-phone" /></router-link>
     </div>
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref } from 'vue';
+import {getUser} from '@/composables/getUser';
 
 export default {
+    data() {
+        return {
+            userid: getUser().uid
+        }
+    },
     setup() {
         const choices = ref(['All', 'Music', 'Movies', 'TV Shows', 'Books', 'Podcasts', 'Newspapers', 'Magazines'])
         const show = ref(false)

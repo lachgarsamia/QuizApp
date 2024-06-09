@@ -10,22 +10,29 @@
   </template>
   
   <script>
+  import loginUser from '@/composables/userLogin';
+  import {getUser} from '@/composables/getUser';
   import { ref } from 'vue';
   
   export default {
-    name: 'Signup',
     setup() {
-      const username = ref('');
       const email = ref('');
       const password = ref('');
-      const role = ref('user');
+      const { error, login } = loginUser();
   
-      const signUp = () => {
-        alert(`User signed up with email: ${email.value}, username: ${username.value}`);
+      const logIn = async () => {
+        await login(email.value, password.value);
+        if (!error.value) {
+          console.log("User successfully logged in!");
+          const user = getUser();
+          window.location.href = `/profile/${user.uid}`;
+        } else {
+          console.log("Error during login");
+        }
       };
   
-      return { username, email, password, role, signUp };
-    },
+      return { email, password, logIn };
+    }
   };
   </script>
   
