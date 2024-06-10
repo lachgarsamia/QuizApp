@@ -2,17 +2,18 @@
     <div class="custom-container">
         <router-link class="rm" to="/">
             <div class="logo-container">
-                <img src="@/assets/logo-OYJ34ERC.png">
+                <img src="@/assets/logo.png">
                 <p class="title-quizzapp"><span class="fancy">Quizz</span>App</p>
             </div>
         </router-link>
         <div class="browse-bar">
-            <input type="text" class="browse" placeholder="Search for a quiz..">
+            <input type="text" class="browse" placeholder="Search for a quiz.." v-model="searchquery"
+                @keyup.enter="search">
             <font-awesome-icon :icon="['fas', 'caret-down']" class="fa-icon" @mouseenter="show = true" />
             <div class="dropdown-menu" v-show="show" @mouseleave="show = false">
                 <p class="choice" v-for="choice in choices">{{ choice }}</p>
             </div>
-            <button class="browse-btn">Browse</button>
+            <button class="browse-btn" @click="search">Browse</button>
         </div>
         <router-link :to="`profile/${userid}`" class="account-desktop">Account</router-link>
         <router-link :to="`profile/${userid}`"><font-awesome-icon :icon="['fas', 'user']"
@@ -21,21 +22,42 @@
 </template>
 
 <script>
-import { ref } from 'vue';
-import {getUser} from '@/composables/getUser';
+import { getUser } from '@/composables/getUser';
 
 export default {
     data() {
         return {
-            userid: getUser().uid
+            userid: '',
+            show: false,
+            searchquery: '',
+            quizzes: null,
+            choices: ["General Knowledge", "Science & Nature", "History & Geography", "Entertainment & Pop Culture", "Sports & Recreation", "Literature & Arts"]
         }
     },
-    setup() {
-        const choices = ref(['All', 'Music', 'Movies', 'TV Shows', 'Books', 'Podcasts', 'Newspapers', 'Magazines'])
-        const show = ref(false)
-        return {
-            choices,
-            show
+    async created() {
+        const user = getUser();
+        if (user) {
+            this.userid = user.uid;
+        }
+        await this.getQuizList();
+    },
+    methods: {
+        async getQuizList() {
+            try {
+                const { quizzes, error, load } = getQuizzes();
+                await load();
+                this.quizzes = quizzes.value;
+            }
+            catch (error) {
+                console.log(error);
+            }
+        },
+        search() {
+            const query = this.searchquery.toLowerCase();
+            console.log("quizzes: ", this.quizzes);
+            return this.quizzes.filter(quiz => {
+                return quiz.title.toLowerCase().includes(query) || quiz.description.toLowerCase().includes(query);
+            });
         }
     }
 }
@@ -139,6 +161,7 @@ export default {
     grid-template-columns: repeat(3, 1fr);
     background: linear-gradient(90deg, #ef42ba, #735def);
     height: fit-content;
+    width: max-content;
     border-radius: 5px;
     border: 1px solid transparent;
     padding: 10px;

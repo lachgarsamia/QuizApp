@@ -10,7 +10,7 @@
     </div>
     <div v-else class="quiz-results text-center">
       <h2 class="text-success">Quiz Completed!</h2>
-      <p class="fs-4">Your Score: {{ score }}/{{ quiz.questions.length }}</p>
+      <p class="fs-4">Your Score: {{ score }}/{{ quiz.questions.length}}</p>
       <button @click="restartQuiz" class="btn btn-success mt-3">Restart Quiz</button>
     </div>
   </div>
@@ -18,105 +18,41 @@
 
 <script>
 import QuizQuestion from "@/components/QuizQuestion.vue";
+import getQuiz from "@/composables/getQuiz";
 
 export default {
   name: "QuizView",
   components: {
     QuizQuestion,
   },
+  async created() {
+  },
   data() {
     return {
-      quiz: {
-        title: "Sample Quiz",
-        questions: [
-          {
-            text: "What is the capital of France?",
-            options: ["Paris", "London", "Berlin", "Madrid"],
-            correct: "Paris",
-          },
-          {
-            text: "What is 2 + 2?",
-            options: ["3", "4", "5", "6"],
-            correct: "4",
-          },
-          {
-            text: "What is the largest planet in our solar system?",
-            options: ["Earth", "Mars", "Jupiter", "Saturn"],
-            correct: "Jupiter",
-          },
-          {
-            text: "What is the boiling point of water?",
-            options: ["90°C", "100°C", "110°C", "120°C"],
-            correct: "100°C",
-          },
-          {
-            text: "Who wrote 'To be, or not to be'?",
-            options: ["Charles Dickens", "Jane Austen", "William Shakespeare", "Mark Twain"],
-            correct: "William Shakespeare",
-          },
-          {
-            text: "What is the chemical symbol for water?",
-            options: ["H2O", "O2", "CO2", "NaCl"],
-            correct: "H2O",
-          },
-          {
-            text: "What is the square root of 16?",
-            options: ["2", "4", "6", "8"],
-            correct: "4",
-          },
-          {
-            text: "Who is known as the father of computers?",
-            options: ["Albert Einstein", "Isaac Newton", "Charles Babbage", "Nikola Tesla"],
-            correct: "Charles Babbage",
-          },
-          {
-            text: "What year did the Titanic sink?",
-            options: ["1905", "1912", "1918", "1923"],
-            correct: "1912",
-          },
-          {
-            text: "What is the smallest prime number?",
-            options: ["0", "1", "2", "3"],
-            correct: "2",
-          },
-          {
-            text: "Which element has the chemical symbol 'O'?",
-            options: ["Oxygen", "Gold", "Silver", "Hydrogen"],
-            correct: "Oxygen",
-          },
-          {
-            text: "How many continents are there on Earth?",
-            options: ["5", "6", "7", "8"],
-            correct: "7",
-          },
-          {
-            text: "What is the tallest mountain in the world?",
-            options: ["K2", "Kangchenjunga", "Lhotse", "Mount Everest"],
-            correct: "Mount Everest",
-          },
-          {
-            text: "What is the longest river in the world?",
-            options: ["Amazon River", "Nile River", "Yangtze River", "Mississippi River"],
-            correct: "Nile River",
-          },
-          {
-            text: "Who painted the Mona Lisa?",
-            options: ["Vincent van Gogh", "Claude Monet", "Leonardo da Vinci", "Pablo Picasso"],
-            correct: "Leonardo da Vinci",
-          },
-        ],
-      },
+      quiz: '',
       currentQuestionIndex: 0,
       answers: [],
       showResults: false,
     };
   },
   computed: {
+    quizID() {
+      return this.$route.params.id;
+    },
     score() {
       return this.answers.filter(
         (answer, index) => answer === this.quiz.questions[index].correct
       ).length;
     },
+  },
+  async created() {
+    try {
+      const { quiz, error, load } = getQuiz(this.quizID);
+      await load();
+      this.quiz = quiz.value;
+    } catch (error) {
+      console.log(error);
+    }
   },
   methods: {
     handleAnswer(answer) {
@@ -134,7 +70,6 @@ export default {
       this.answers = [];
       this.currentQuestionIndex = 0;
       this.showResults = false;
-
     }
   },
 };

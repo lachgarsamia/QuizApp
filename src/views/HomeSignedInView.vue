@@ -5,8 +5,10 @@
       <h2 class="home-title">Trending quizzes in your feed</h2>
       <router-link to="/createquiz" v-if="isAdmin" class="create-form-btn">Create New</router-link>
     </div>
+    <button @click="add">add</button>
     <div class="quizzes-container">
-      <router-link v-for="(quiz, index) in quizzes" :key="index" :to="{ name: 'quiz', params: { questionIndex: 0 } }" class="quiz-card">
+      <router-link v-for="(quiz, index) in quizzes" :key="index" :to="`/quiz/${quiz.id}`"
+        class="quiz-card" @mouseenter="(event) => quizhover(event)" @mouseleave="(event) => quizregular(event, index)">
         <div class="quiz-title">{{ quiz.title }}</div>
         <img :src="quiz.url" class="quiz-image" />
       </router-link>
@@ -15,26 +17,22 @@
 </template>
 
 <script>
-import NavbarSignedin from "@/components/NavbarSignedin.vue"; 
+import NavbarSignedin from "@/components/NavbarSignedin.vue";
+import addQuizzesToFirestore from "@/composables/data";
+import getQuizzes from "@/composables/getQuizzes";
 
 export default {
   name: "HomeSignedInView",
   components: {
     NavbarSignedin,
   },
+  async created() {
+    await this.getQuizList();
+  },
   data() {
     return {
-      quizzes: [
-        { id: 1, title: "Science Quiz", url: require("@/assets/think.jpg") },
-        { id: 2, title: "Math Quiz", url: require("@/assets/tomobil.jpg") },
-        { id: 3, title: "History Quiz", url: require("@/assets/think.jpg") },
-        { id: 4, title: "Geography Quiz", url: require("@/assets/tomobil.jpg") },
-        { id: 5, title: "Philosophy Quiz", url: require("@/assets/think.jpg") },
-        { id: 6, title: "Physics Quiz", url: require("@/assets/tomobil.jpg") },
-        { id: 7, title: "Poetry Quiz", url: require("@/assets/think.jpg") },
-        { id: 8, title: "Arts Quiz", url: require("@/assets/tomobil.jpg") },
-      ],
-      isAdmin: true, 
+      quizzes: "",
+      isAdmin: true,
     };
   },
   methods: {
@@ -46,13 +44,25 @@ export default {
         "linear-gradient(90deg, #ef42ba, #735def)";
     },
     quizregular(event, idx) {
-      event.target.querySelector(".quiz-title").textContent =
-        this.quizzes[idx].title;
+      event.target.querySelector(".quiz-title").textContent = this.quizzes[idx].title;
       event.target.querySelector(".quiz-image").style.display = "block";
       event.target.querySelector(".quiz-title").style.mixBlendMode = "difference";
       event.target.style.background = "#fefefe";
+    },
+    add() {
+      addQuizzesToFirestore();
+    },
+    async getQuizList() {
+      try {
+        const { quizzes, error, load } = getQuizzes();
+        await load();
+        this.quizzes = quizzes.value;
+      }
+      catch (error) {
+        console.log(error);
+      }
     }
-  },
+  }
 };
 </script>
 

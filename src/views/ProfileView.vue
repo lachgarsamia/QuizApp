@@ -1,32 +1,32 @@
 <template>
-    <div class="profile-container container mt-5 p-4 rounded shadow bg-light">
-        <router-link :to="`/editprofile/${userid}`" class="btn btn-primary mb-4">Edit Profile</router-link>
-        <h2 class="profile-title text-center">Your Profile</h2>
-        <div class="profile-line row bg-primary text-white p-3 rounded mb-4">
-            <div class="profile-info col-md-8">
-                <img :src="photoURL" alt="Profile Picture" class="rounded-circle" width="100" height="100" />
+    <div class="profile-container">
+        <router-link :to="`/editprofile/${userid}`" class="edit-profile-btn">Edit Profile</router-link>
+        <h2 class="profile-title">Your Profile</h2>
+        <div class="profile-line">
+            <div class="profile-info">
+                <img :src="photoURL" alt="Profile Picture" class="profile-picture" />
                 <p class="username">{{ username }}</p>
                 <p class="description">{{ description }}</p>
                 <div class="categories">
-                    <div class="badge badge-pill badge-info category" v-for="category in categories" :key="category">
+                    <div class="category" v-for="category in categories" :key="category">
                         {{ category }}
                     </div>
                 </div>
             </div>
-            <div class="best-standing col-md-4 text-center">
+            <div class="best-standing">
                 <p>Best Standing: <span class="standing">{{ standing }}</span></p>
                 <p>in {{ quiz_title }}</p>
             </div>
         </div>
         <div class="quizzes-taken">
             <p class="profile-title">Participated in {{ quizzes_taken.length }} Quizzes</p>
-            <div class="row">
-                <div v-for="(quiz, index) in quizzes_taken" :key="index" class="quiz-card col-md-4 mb-4">
+            <div class="quizzes-grid">
+                <div v-for="(quiz, index) in quizzes_taken" :key="index" class="quiz-card">
                     <div class="card">
-                        <img :src="quiz.url" class="card-img-top quiz-image" alt="Quiz image" />
+                        <img :src="quiz.url" class="quiz-image" alt="Quiz image" />
                         <div class="card-body">
-                            <h5 class="card-title quiz-title">{{ quiz.title }}</h5>
-                            <p class="card-text quiz-score">Score: {{ quiz.score }}</p>
+                            <h5 class="quiz-title">{{ quiz.title }}</h5>
+                            <p class="quiz-score">Score: {{ quiz.score }}</p>
                         </div>
                     </div>
                 </div>
@@ -46,11 +46,9 @@ export default {
         return {
             username: '',
             description: '',
-            quizzes_taken: [
-                { title: '', link: '', score: 0 },
-            ],
+            quizzes_taken: [],
             standings: [],
-            categories: [''],
+            categories: [],
             userid: '',
             photoURL: ''
         };
@@ -61,101 +59,136 @@ export default {
         },
     },
     methods: {
-    async fetchData() {
-      const user = auth.currentUser;
-      const ref = await app.collection('users').doc(user.uid).get();
-      const quizlist = ref.data().quizzes_taken;
-      for (const quizID of quizlist) {
-        try{
-          const res = await app.collection('quizzes').doc(quizID).get()
-          const quiz = res.data();
-          this.quizzes.push(quiz);
+        async fetchData() {
+            const user = auth.currentUser;
+            const ref = await app.collection('users').doc(user.uid).get();
+            if (user && ref.exists) {
+                const userData = ref.data();
+                this.username = userData.username;
+                this.description = userData.description;
+                this.standings = userData.standings;
+                this.categories = userData.categories;
+                this.userid = user.uid;
+                this.photoURL = await storage.ref(`images/${user.uid}/jester.png`).getDownloadURL();
+
+                const quizList = userData.quizzes_taken || [];
+                this.quizzes_taken = await Promise.all(quizList.map(async (quizID) => {
+                    const quizRef = await app.collection('quizzes').doc(quizID).get();
+                    return quizRef.exists ? quizRef.data() : null;
+                })).then(quizzes => quizzes.filter(quiz => quiz !== null));
+            }
         }
-        catch (err){
-          console.log(err);
-        }
-      }
-      if (user) {
-        const actual_user = ref.data();
-        this.username = actual_user.username;
-        this.standings = actual_user.standings;
-        this.categories = actual_user.categories;
-        this.quizzes_taken = actual_user.quizzes_taken;
-        this.description = actual_user.description;
-        this.userJoinedDate = new Date(user.metadata.creationTime).toLocaleDateString();
-        this.userid = user.uid;
-        this.userEmail = user.email;
-        this.photoURL = await storage.ref(`images/${user.uid}/jester.png`).getDownloadURL();
-      }
+    },
+    mounted() {
+        waitForAuthInit().then(() => {
+            this.fetchData();
+        });
     }
-  },
-  mounted() {
-    waitForAuthInit().then(() => {
-      this.fetchData();
-    })
-  }
 };
 </script>
 
-<style scoped>
+
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
 :root {
-    --primary-color: #007bff;
-    --secondary-color: #28a745;
-    --background-color: #f8f9fa;
+    --primary-color: #F59931;
+    --secondary-color: #EF42BA;
+    --background-color: #FEFEFE;
     --text-color: #343a40;
     --border-color: #dee2e6;
-    --hover-color: #f5f5f5;
-    --transition-duration: 0.3s;
+    --hover-color: #F5F5F5;
+    --gradient-start: #EF42BA;
+    --gradient-end: #735DEF;
 }
 
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: var(--background-color);
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 .profile-container {
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 20px auto;
     padding: 20px;
+    background-color: var(--background-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.edit-profile-btn {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    text-decoration: none;
+    border-radius: 5px;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+.edit-profile-btn:hover {
+    background-color: var(--secondary-color);
 }
 
 .profile-title {
-    font-size: 24px;
+    font-size: 36px;
     font-weight: bold;
     margin-bottom: 20px;
+    color: var(--secondary-color);
+    text-align: center;
 }
 
 .profile-line {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: var(--primary-color);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
     padding: 20px;
     border-radius: 8px;
-    color: white;
+    color: var(--background-color);
+    margin-bottom: 20px;
 }
 
 .profile-info {
-    flex: 1;
-    margin-right: 20px;
+    text-align: center;
+    padding: 20px;
+    background: var(--background-color);
+    border-radius: 8px;
+}
+
+.profile-picture {
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    margin-bottom: 10px;
 }
 
 .username {
-    font-size: 18px;
+    font-size: 24px;
     font-weight: bold;
     margin-bottom: 10px;
+    color: var(--text-color);
 }
 
 .description {
-    font-size: 14px;
+    font-size: 16px;
     margin-bottom: 10px;
+    color: var(--text-color);
 }
 
 .categories {
     display: flex;
     gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+    flex-wrap: wrap;
 }
 
 .category {
@@ -163,14 +196,19 @@ body {
     border-radius: 15px;
     font-size: 12px;
     font-weight: bold;
-    background-color: var(--secondary-color);
+    background-color: var(--primary-color);
+    color: var(--background-color);
 }
 
 .best-standing {
-    background-color: #ffb74d;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary-color);
     padding: 20px;
     border-radius: 8px;
-    color: black;
+    color: var(--background-color);
     text-align: center;
 }
 
@@ -183,19 +221,31 @@ body {
     margin-top: 40px;
 }
 
+.quizzes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
 .quiz-card {
-    background-color: white;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
     text-align: center;
-    margin-bottom: 20px;
+    transition: transform 0.3s;
+}
+
+.quiz-card:hover {
+    transform: translateY(-10px);
 }
 
 .quiz-title {
     font-size: 18px;
     font-weight: bold;
     margin-bottom: 10px;
+    color: var(--text-color);
 }
 
 .quiz-image {
@@ -208,5 +258,6 @@ body {
 .quiz-score {
     font-size: 14px;
     font-weight: bold;
+    color: var(--text-color);
 }
 </style>

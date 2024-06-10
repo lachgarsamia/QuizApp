@@ -2,13 +2,14 @@
   <div class="container-fluid p-0">
     <!-- Hero Section -->
     <section class="hero d-flex flex-column align-items-center justify-content-center text-center text-white position-relative w-100">
-      <img src="@/assets/logo-OYJ34ERC.png" alt="QuizzApp Logo" class="logo mb-4">
+      <img src="@/assets/logo.png" alt="QuizzApp Logo" class="logo mb-4">
       <div class="hero-content">
         <h1 class="display-3 fw-bold" editable="inline">Welcome to QuizzApp</h1>
         <p class="lead" editable="inline">Test your knowledge with our engaging quizzes!</p>
         <router-link to="/signup">
           <button class="btn btn-primary btn-lg mt-4">Get Started</button>
         </router-link>
+        <p class="fs-6">Already a member? <router-link to="/login" class="text-white">Login here</router-link></p>
       </div>
     </section>
 

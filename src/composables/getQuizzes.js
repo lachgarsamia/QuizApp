@@ -2,17 +2,17 @@ import { ref } from 'vue';
 import { app } from '@/firebase/config';
 
 const getQuizzes = () => {
-    const quizzes = ref([])
-    const error = ref(null)
+  const quizzes = ref([])
+  const error = ref(null)
 
   const load = async () => {
     try {
-      const res = await app.collection('quizzes').get()
+      const res = await app.collection('quizzes').get();
       quizzes.value = res.docs.map(doc => {
         return { ...doc.data(), id: doc.id }
       })
     }
-    catch(err) {
+    catch (err) {
       error.value = err.message
     }
   }

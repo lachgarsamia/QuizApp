@@ -1,5 +1,5 @@
 <template>
-  <div class="question-container">
+  <div v-if="quiz && currentQuestion" class="question-container">
     <h3>Question {{ questionIndex + 1 }}</h3>
     <p v-if="currentQuestion">{{ currentQuestion.text }}</p>
     <div class="options">
@@ -38,7 +38,7 @@ export default {
   methods: {
     submitAnswer() {
       this.$emit('answer', this.selectedOption);
-      this.selectedOption = null;  // Reset selection for the next question
+      this.selectedOption = null;  
     },
   },
 };

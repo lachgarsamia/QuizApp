@@ -1,9 +1,9 @@
 import { ref } from 'vue'
 import { app } from '@/firebase/config'
 
-const getRecipe = (id) => {
+const getQuiz = (id) => {
 
-  const quizz = ref(null)
+  const quiz = ref(null)
   const error = ref(null)
 
   const load = async () => {
@@ -11,16 +11,16 @@ const getRecipe = (id) => {
       let res = await app.collection('quizzes').doc(id).get()
 
       if (!res.exists) {
-        throw Error('Uh oh! This recipe does not exist!')
+        throw Error('Uh oh! This quiz does not exist!')
       }
-      quizz.value = { ...res.data(), id: res.id }
+      quiz.value = { ...res.data(), id: res.id }
     }
     catch(err) {
       error.value = err.message
     }
   }
 
-  return { quizz, error, load } 
+  return { quiz, error, load } 
 }
 
-export default getRecipe
+export default getQuiz

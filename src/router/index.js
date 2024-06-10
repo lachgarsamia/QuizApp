@@ -9,32 +9,47 @@ import CreateQuizView from '@/views/CreateQuizView.vue';
 import QuizView from '@/views/QuizView.vue';
 import EditProfileView from '@/views/EditProfileView.vue';
 
+import { isLogged, waitForAuthInit } from '@/composables/getUser'; 
+
 const routes = [
-  { path: '/welcome', component: WelcomeView },
-  { path: '/signup', component: SignUpView },
+  { path: '/welcome', component: WelcomeView, meta: {logged: false} },
+  { path: '/signup', component: SignUpView},
   { path: '/login', component: LoginView },
-  { path: '/home', component: HomeSignedInView},
-  { path: '/profile/:id', component: ProfileView},
-  { path: '/leaderboard', component: LeaderboardView},
-  { path: '/createquiz', component: CreateQuizView},
-  { path: '/editprofile/:id', component: EditProfileView},
+  { path: '/home', component: HomeSignedInView, meta: {logged: true}},
+  { path: '/profile/:id', component: ProfileView, meta: {logged: true}},
+  { path: '/leaderboard', component: LeaderboardView, meta: {logged: true}},
+  { path: '/createquiz', component: CreateQuizView, meta: {logged: true}},
+  { path: '/editprofile/:id', component: EditProfileView, meta: {logged: true}},
   { path: '/', redirect: '/welcome' },
   {
-    path: '/quiz/:questionIndex',
+    path: '/quizquestion/:questionIndex',
     name: 'QuizQuestion',
     component: () => import('@/components/QuizQuestion.vue'),
     props: true,
-  },
+    meta: {logged: false}},
   {
-    path: '/quiz',
+    path: '/quiz/:id',
     name: 'quiz',
-    component: QuizView,
+    component: QuizView, meta: {logged: false}
   },
 ];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const logged = to.matched.some(record => record.meta.logged);
+
+  waitForAuthInit().then(() => {
+    if (logged && !isLogged()) {
+      alert("You need to be logged in to access this page");
+      next({path: '/login'});
+    } else {
+      next();
+    }
+  });
 });
 
 export default router;
