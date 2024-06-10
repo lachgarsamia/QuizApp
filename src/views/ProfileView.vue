@@ -39,16 +39,16 @@
 import { app, auth } from "@/firebase/config";
 import { waitForAuthInit } from "@/composables/getUser";
 import { storage } from '@/firebase/config';
-
 export default {
     name: 'Profile',
     data() {
         return {
             username: '',
+            username: '',
             description: '',
             quizzes_taken: [],
             standings: [],
-            categories: [],
+            categories: [''],
             userid: '',
             photoURL: ''
         };
@@ -59,34 +59,41 @@ export default {
         },
     },
     methods: {
-        async fetchData() {
-            const user = auth.currentUser;
-            const ref = await app.collection('users').doc(user.uid).get();
-            if (user && ref.exists) {
-                const userData = ref.data();
-                this.username = userData.username;
-                this.description = userData.description;
-                this.standings = userData.standings;
-                this.categories = userData.categories;
-                this.userid = user.uid;
-                this.photoURL = await storage.ref(`images/${user.uid}/jester.png`).getDownloadURL();
-
-                const quizList = userData.quizzes_taken || [];
-                this.quizzes_taken = await Promise.all(quizList.map(async (quizID) => {
-                    const quizRef = await app.collection('quizzes').doc(quizID).get();
-                    return quizRef.exists ? quizRef.data() : null;
-                })).then(quizzes => quizzes.filter(quiz => quiz !== null));
-            }
+    async fetchData() {
+      const user = auth.currentUser;
+      const ref = await app.collection('users').doc(user.uid).get();
+      const quizlist = ref.data().quizzes_taken;
+      for (const quizID of quizlist) {
+        try{
+          const res = await app.collection('quizzes').doc(quizID).get()
+          const quiz = res.data();
+          this.quizzes.push(quiz);
         }
-    },
-    mounted() {
-        waitForAuthInit().then(() => {
-            this.fetchData();
-        });
+        catch (err){
+          console.log(err);
+        }
+      }
+      if (user) {
+        const actual_user = ref.data();
+        this.username = actual_user.username;
+        this.standings = actual_user.standings;
+        this.categories = actual_user.categories;
+        this.quizzes_taken = actual_user.quizzes_taken;
+        this.description = actual_user.description;
+        this.userJoinedDate = new Date(user.metadata.creationTime).toLocaleDateString();
+        this.userid = user.uid;
+        this.userEmail = user.email;
+        this.photoURL = await storage.ref(`images/${user.uid}/jester.png`).getDownloadURL();
+      }
     }
+  },
+  mounted() {
+    waitForAuthInit().then(() => {
+      this.fetchData();
+    })
+  }
 };
 </script>
-
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
@@ -99,14 +106,13 @@ export default {
     --border-color: #dee2e6;
     --hover-color: #F5F5F5;
     --gradient-start: #EF42BA;
-    --gradient-end: #735DEF;
+    --gradient-end: #190976;
     --transition-speed: 0.3s;
 }
 
 body {
     font-family: 'Roboto', sans-serif;
-    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-    color: var(--text-color);
+    color: lightblue;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -119,6 +125,7 @@ body {
     background-color: var(--background-color);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
+
 }
 
 .edit-profile-btn {
@@ -141,7 +148,7 @@ body {
     font-size: 36px;
     font-weight: bold;
     margin-bottom: 20px;
-    color: var(--secondary-color);
+    color: dodgerblue;
     text-align: center;
 }
 
@@ -259,7 +266,7 @@ body {
     font-size: 18px;
     font-weight: bold;
     margin-bottom: 10px;
-    color: var(--text-color);
+    color: rgb(9, 43, 130)
 }
 
 .quiz-image {
@@ -276,3 +283,4 @@ body {
 }
 
 </style>
+
