@@ -100,6 +100,7 @@ export default {
     --hover-color: #F5F5F5;
     --gradient-start: #EF42BA;
     --gradient-end: #735DEF;
+    --transition-speed: 0.3s;
 }
 
 body {
@@ -129,7 +130,7 @@ body {
     text-decoration: none;
     border-radius: 5px;
     text-align: center;
-    transition: background-color 0.3s;
+    transition: background-color var(--transition-speed);
 }
 
 .edit-profile-btn:hover {
@@ -160,6 +161,9 @@ body {
     padding: 20px;
     background: var(--background-color);
     border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .profile-picture {
@@ -168,6 +172,11 @@ body {
     height: 100px;
     object-fit: cover;
     margin-bottom: 10px;
+    transition: transform var(--transition-speed);
+}
+
+.profile-picture:hover {
+    transform: scale(1.1);
 }
 
 .username {
@@ -198,6 +207,11 @@ body {
     font-weight: bold;
     background-color: var(--primary-color);
     color: var(--background-color);
+    transition: background-color var(--transition-speed);
+}
+
+.category:hover {
+    background-color: var(--secondary-color);
 }
 
 .best-standing {
@@ -234,7 +248,7 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
     text-align: center;
-    transition: transform 0.3s;
+    transition: transform var(--transition-speed);
 }
 
 .quiz-card:hover {
@@ -260,4 +274,5 @@ body {
     font-weight: bold;
     color: var(--text-color);
 }
+
 </style>
