@@ -10,6 +10,8 @@ const addQuizzesToFirestore = async (quizzesData) => {
         difficulty: quiz.difficulty,
         description: quiz.description,
         authorID: quiz.authorID,
+        players: quiz.players,
+        authorID: quiz.author
       });
     }
     console.log("Quizzes added to Firestore successfully!");

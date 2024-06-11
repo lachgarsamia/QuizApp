@@ -70,6 +70,7 @@ export default {
       this.$router.push(`/profile/${user.uid}`);
     },
     async fetchData() {
+      await waitForAuthInit();
       const user = auth.currentUser;
       const ref = await app.collection('users').doc(user.uid).get();
       if (user) {
@@ -81,7 +82,13 @@ export default {
         this.userJoinedDate = new Date(user.metadata.creationTime).toLocaleDateString();
         this.userid = user.uid;
         this.userEmail = user.email;
-        this.photoURL = await storage.ref(`images/${user.uid}/profile.jpg`).getDownloadURL();
+        try {
+          const profilePhotoRef = storage.ref(`images/${user.uid}/profile.jpg`);
+          const profilePhotoSnapshot = await profilePhotoRef.getMetadata();
+          this.photoURL = await profilePhotoRef.getDownloadURL();
+        } catch (error) {
+          console.log(error);
+        }
       }
     },
   },
@@ -174,15 +181,15 @@ export default {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
-.profile-pic{
+.profile-pic {
   position: relative;
 }
 
-.upload-image{
+.upload-image {
   cursor: pointer;
   position: absolute;
   top: 40px;
-  left:10px;
+  left: 10px;
   opacity: 0;
 }
 

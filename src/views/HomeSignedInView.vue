@@ -6,7 +6,6 @@
       <h2 class="home-title" v-show="search">Search Results</h2>
       <router-link to="/createquiz" v-if="isAdmin" class="create-form-btn">Create New</router-link>
     </div>
-    <button @click="add">add</button>
     <div class="quizzes-container">
       <router-link v-for="(quiz, index) in filteredQuizzes" :key="index" :to="`/quiz/${quiz.id}`" class="quiz-card"
         @mouseenter="(event) => quizhover(event, index)" @mouseleave="(event) => quizregular(event, index)">
@@ -43,7 +42,7 @@ export default {
       filter: false,
       isAdmin: false,
       searchbar: true,
-    };
+    }
   },
   computed: {
     filteredQuizzes() {
@@ -76,10 +75,6 @@ export default {
       quizTitleElement.style.fontSize = "1.5em";
       event.target.querySelector(".quiz-image").style.display = "block";
       event.target.style.background = "#fefefe";
-    },
-
-    add() {
-      addQuizzesToFirestore();
     },
     async getQuizList() {
       try {
