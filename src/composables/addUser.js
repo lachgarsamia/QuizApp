@@ -13,7 +13,7 @@ const signup = async (email, password, username) => {
             throw new Error('Could not signup')
         
         await response.user.updateProfile({username: username})
-        const userdata = { username: username, quizzes_taken: [''], created_quizzes: [''], role: 'user'};
+        const userdata = { username: username, quizzes_taken: [], created_quizzes: [], role: 'user'};
         await app.collection('users').doc(response.user.uid).set(userdata);
         
         error.value = null

@@ -1,0 +1,25 @@
+[debug] [2024-06-11T23:12:52.956Z] ----------------------------------------------------------------------
+[debug] [2024-06-11T23:12:52.959Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\DELL\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2024-06-11T23:12:52.960Z] CLI Version:   13.11.2
+[debug] [2024-06-11T23:12:52.960Z] Platform:      win32
+[debug] [2024-06-11T23:12:52.960Z] Node Version:  v20.12.2
+[debug] [2024-06-11T23:12:52.960Z] Time:          Wed Jun 12 2024 00:12:52 GMT+0100 (UTC+01:00)
+[debug] [2024-06-11T23:12:52.961Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-06-11T23:12:53.080Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-06-11T23:12:53.080Z] > authorizing via signed-in user (safae.haj@gmail.com)
+[debug] [2024-06-11T23:12:53.081Z] [iam] checking project quizz-app-a108c for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2024-06-11T23:12:53.084Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/quizz-app-a108c:testIamPermissions [none]
+[debug] [2024-06-11T23:12:53.085Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/quizz-app-a108c:testIamPermissions x-goog-quota-user=projects/quizz-app-a108c
+[debug] [2024-06-11T23:12:53.085Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/quizz-app-a108c:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2024-06-11T23:12:54.025Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/quizz-app-a108c:testIamPermissions 200
+[debug] [2024-06-11T23:12:54.025Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/quizz-app-a108c:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2024-06-11T23:12:54.026Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/quizz-app-a108c [none]
+[debug] [2024-06-11T23:12:54.382Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/quizz-app-a108c 200
+[debug] [2024-06-11T23:12:54.382Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/quizz-app-a108c {"projectId":"quizz-app-a108c","projectNumber":"807063003420","displayName":"Quizz App","name":"projects/quizz-app-a108c","resources":{"hostingSite":"quizz-app-a108c","storageBucket":"quizz-app-a108c.appspot.com","locationId":"us-central"},"state":"ACTIVE","etag":"1_d24d66fb-1df2-49f3-a42e-8e6d0b1657b3"}
+[info] 
+[info] === Deploying to 'quizz-app-a108c'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2024-06-11T23:12:54.394Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/quizz-app-a108c/versions [none]
+[debug] [2024-06-11T23:12:54.394Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/quizz-app-a108c/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}

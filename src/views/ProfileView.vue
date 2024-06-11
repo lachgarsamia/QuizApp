@@ -85,9 +85,10 @@ export default {
     },
     methods: {
         async fetchData() {
-            await waitForAuthInit();
-            const user = auth.currentUser;
+            const user = getUser();
+            console.log("user: ", user.uid);
             const ref = await app.collection('users').doc(user.uid).get();
+            console.log("ref: ",ref);
             if (user) {
                 const actual_user = ref.data();
                 this.username = actual_user.username;
@@ -106,7 +107,6 @@ export default {
                     console.log(error);
                 }
                 const quizzes_taken = actual_user.quizzes_taken;
-                console.log(quizzes_taken);
                 for (const quizID of quizzes_taken) {
                     const quiz = (await app.collection("quizzes").doc(quizID).get()).data();
                     this.quizzes_taken.push({ id: quizID, data: quiz });
