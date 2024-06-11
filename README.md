@@ -66,8 +66,6 @@ QuizApp is a web application designed to allow users to take quizzes and receive
 - **Data Storage:**
   - Secure storage of quiz questions, user responses, and leaderboard data in Firebase Cloud Firestore.
 
-## Installation
-
 ## Usage
 --Signup/Login: Create a new account or log in with existing credentials.
 -Profile: Edit your profile details.
