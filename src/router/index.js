@@ -8,7 +8,8 @@ import LeaderboardView from '@/views/LeaderboardView.vue';
 import CreateQuizView from '@/views/CreateQuizView.vue';
 import QuizView from '@/views/QuizView.vue';
 import EditProfileView from '@/views/EditProfileView.vue';
-
+import EditQuizView from '@/views/EditQuizView.vue';
+import QuizLeaderBoardView from '@/views/QuizLeaderBoardView.vue';
 import { isLogged, waitForAuthInit } from '@/composables/getUser'; 
 
 const routes = [
@@ -20,6 +21,8 @@ const routes = [
   { path: '/leaderboard', component: LeaderboardView, meta: {logged: true}},
   { path: '/createquiz', component: CreateQuizView, meta: {logged: true}},
   { path: '/editprofile/:id', component: EditProfileView, meta: {logged: true}},
+  { path: '/edit-quiz/:id', component: EditQuizView, meta: {logged: true}},
+  { path: '/quiz/:id/leaderboard', component: QuizLeaderBoardView, meta: {logged: true}},
   { path: '/', redirect: '/redirect' },
   {
     path: '/quizquestion/:questionIndex',

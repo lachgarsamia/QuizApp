@@ -183,7 +183,11 @@ export default {
   position: absolute;
   top: 40px;
   left:10px;
-  background-color: transparent;
+  opacity: 0;
+}
+
+.upload-image:hover {
+  opacity: 1;
 }
 
 .username {

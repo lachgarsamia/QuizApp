@@ -3,9 +3,12 @@
 </template>
 
 <script>
+import {getUser, waitForAuthInit} from '@/composables/getUser';
+
 export default {
   name: 'App',
-};
+ 
+}
 </script>
 
 <style>

@@ -3,6 +3,7 @@
     <div class="profile-container">
         <div class="profile-header">
             <router-link :to="`/editprofile/${userid}`" class="edit-profile-btn">Edit Profile</router-link>
+            <button @click="logout" class="logout-btn">Logout</button>
             <div class="profile-info">
                 <img :src="photoURL" alt="Profile Picture" class="profile-picture" />
                 <div class="profile-details">
@@ -20,12 +21,34 @@
             </div>
         </div>
 
-        <div class="quizzes-taken">
-            <div class="quizzes-grid">
-                <div v-for="(quiz, index) in quizzes_taken" :key="index" class="quiz-card">
-                    <div class="card-body">
-                        <h5 class="quiz-title">{{ quiz.title }}</h5>
-                        <p class="quiz-score">Score: {{ quiz.score }}</p>
+        <div class="quiz-flex">
+            <div class="quizzes-taken">
+                <div class="quizzes-grid">
+                    <h2 class="bold">Taken Quizzes</h2>
+                    <div v-if="quizzes_taken.length !== 0" v-for="(quiz, index) in quizzes_taken" :key="index"
+                        class="quiz-card">
+                        <div class="card-body">
+                            <router-link :to="`/quiz/${quiz.id}`">
+                                <h5 class="quiz-title"> {{ quiz.data.title }}</h5>
+                            </router-link>
+                            <p class="quiz-score">Score: {{ quiz.data.players.find((player) => player.id === userid).score }}</p>
+                        </div>
+                    </div>
+                    <div v-else>
+                        No quizzes taken yet.
+                    </div>
+                </div>
+            </div>
+            <div class="quizzes-taken">
+                <div class="quizzes-grid">
+                    <div v-if="isAdmin">
+                        <h2 class="bold">Your Created Quizzes</h2>
+                        <div v-for="(quiz, index) in created_quizzes" :key="index" class="quiz-card">
+                            <router-link :to="`/quiz/${quiz.id}`">
+                                <h5 class="quiz-title"> {{ quiz.data.title }}</h5>
+                            </router-link>
+                            <router-link :to="`/edit-quiz/${quiz.id}`">Edit Quiz</router-link>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -39,6 +62,7 @@ import { app, auth } from "@/firebase/config";
 import { waitForAuthInit } from "@/composables/getUser";
 import { storage } from '@/firebase/config';
 import NavbarSignedin from "@/components/NavbarSignedin.vue";
+
 export default {
     name: 'Profile',
     components: { NavbarSignedin },
@@ -47,6 +71,7 @@ export default {
             username: '',
             description: '',
             quizzes_taken: [],
+            created_quizzes: [],
             standings: [],
             categories: [''],
             userid: '',
@@ -64,29 +89,42 @@ export default {
         async fetchData() {
             const user = auth.currentUser;
             const ref = await app.collection('users').doc(user.uid).get();
-            const quizlist = ref.data().quizzes_taken;
-            for (const quizID of quizlist) {
-                try {
-                    const res = await app.collection('quizzes').doc(quizID).get();
-                    const quiz = res.data();
-                    this.quizzes.push(quiz);
-                }
-                catch (err) {
-                    console.log(err);
-                }
-            }
             if (user) {
                 const actual_user = ref.data();
                 this.username = actual_user.username;
                 this.standings = actual_user.standings;
                 this.categories = actual_user.categories;
-                this.quizzes_taken = actual_user.quizzes_taken;
                 this.description = actual_user.description;
                 this.userJoinedDate = new Date(user.metadata.creationTime).toLocaleDateString();
                 this.userid = user.uid;
                 this.userEmail = user.email;
                 this.photoURL = await storage.ref(`images/${user.uid}/profile.jpg`).getDownloadURL();
+
+                const quizzes_taken = actual_user.quizzes_taken;
+                for (const quizID of quizzes_taken) {
+                    const quiz = (await app.collection("quizzes").doc(quizID).get()).data();
+                    this.quizzes_taken.push({ id: quizID, data: quiz });
+                }
+
+                if (actual_user.role === "admin") {
+                    const quizzes_created = actual_user.created_quizzes;
+                    for (const quizID of quizzes_created) {
+                        const quiz = (await app.collection("quizzes").doc(quizID).get()).data();
+                        this.created_quizzes.push({ id: quizID, data: quiz });
+                    }
+                }
             }
+        },
+        logout() {
+            auth.signOut().then(() => {
+                console.log('User signed out');
+            }).catch(error => {
+                console.error('Error signing out:', error);
+            });
+            this.$router.push('/welcome');
+        },
+        async userChanged(user) {
+            this.user = user;
         }
     },
     async mounted() {
@@ -110,7 +148,7 @@ export default {
 .edit-profile-btn {
     display: inline-block;
     margin-bottom: 20px;
-    padding: 12px 25px;
+    padding: 12px 20px;
     background-color: #F59931;
     color: #FEFEFE;
     text-decoration: none;
@@ -120,12 +158,35 @@ export default {
     transition: background-color 0.3s, transform 0.3s;
     position: absolute;
     top: -20px;
-    right: -20px;
+    right: 120px;
+    width: 120px;
 }
 
 .edit-profile-btn:hover {
     background-color: #EF42BA;
     transform: translateY(-2px);
+}
+
+.logout-btn{
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 12px 25px;
+    background-color: #343a40;
+    border: none;
+    color: #FEFEFE;
+    text-decoration: none;
+    border-radius: 25px;
+    text-align: center;
+    font-weight: 500;
+    transition: background-color 0.3s, transform 0.3s;
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 120px;
+}
+
+.bold {
+    font-weight: 600;
 }
 
 .profile-title {
@@ -141,6 +202,12 @@ export default {
     gap: 5px;
 }
 
+.quiz-flex {
+    display: flex;
+    gap: 20px;
+    align-items: start;
+}
+
 .profile-header {
     display: flex;
     justify-content: space-between;
@@ -153,6 +220,7 @@ export default {
     width: 50%;
     position: relative;
 }
+
 .verified {
     color: #429AF8;
 }

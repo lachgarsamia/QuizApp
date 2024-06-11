@@ -2,7 +2,9 @@
   <div class="quiz-container">
     <form @submit.prevent="submitQuiz" class="form-container">
       <div class="create-quiz">
-        <img src="@/assets/logo.png" class="logo" alt="Logo" />
+        <router-link to="/home" class="back-button">
+          <img src="@/assets/logo.png" class="logo" alt="Logo" />
+          </router-link>
         <h2 class="title">Create a Quiz</h2>
         <input type="submit" value="Add Quiz" class="submit-button" />
       </div>
@@ -49,7 +51,7 @@
               :icon="['fas', 'plus']" />
             <input v-model="response.text" type="text" :placeholder="'Enter response ' + (responseIndex + 1)" required
               class="form-control" />
-            <input type="checkbox" class="correct" :value="response" v-model="selectedQuestion.correct" />
+            <input type="checkbox" class="correct" :value="response.text" v-model="selectedQuestion.correct" />
             <font-awesome-icon class="remove-response-button" @click="removeResponse(responseIndex, selectedQuestionIndex)"
               v-if="selectedQuestion.options.length > 1" :icon="['fas', 'window-close']" />
           </li>
@@ -61,7 +63,7 @@
 
 <script>
 import { app } from "@/firebase/config";
-import getUser from "@/composables/addUser";
+import {getUser} from "@/composables/getUser";
 export default {
   name: "CreateQuizView",
   data() {
@@ -74,11 +76,12 @@ export default {
       questions: [
         {
           text: '',
-          options: [{ text: '' }],
+          options: [{text: '' }],
           correct: []
         }
       ],
-      selectedQuestionIndex: 0
+      selectedQuestionIndex: 0,
+      user: ''
     };
   },
   computed: {
@@ -89,6 +92,9 @@ export default {
       return null;
     }
   },
+  async created() {
+    this.user = await getUser();
+  },
   methods: {
     addQuestion() {
       this.questions.push(this.createQuestion(this.nextQuestionId++));
@@ -96,40 +102,15 @@ export default {
     addResponse(idx) {
       const question = this.questions[idx];
       if (question.options.length < 4) {
-        question.options.push(this.createResponse(question.options.length + 1));
+        question.options.push({text: '' });
       }
     },
-    async submitQuiz() {
-      const uid = await getUser().uid;
-      console.log(uid);
-      const quizData = {
-        title: this.title,
-        category: this.selectedCategory,
-        difficulty: this.selectedDifficulty,
-        description: this.description,
-        questions: this.questions
-      };
-      const Ref = await app.collection('quizzes').add(quizData);
-      const quizID = Ref.id;
-      const author = app.collection('users').doc(uid);
-      const user = await author.get();
-      const currentQuizzes = (user.data().quizzes == null) ? user.data().quizzes : [];
-
-      currentQuizzes.push(quizID);
-      await usersRef.update({ quizzes: currentQuizzes });
-
-      this.$router.push("/home");
-    },
-    createQuestion(id) {
+    createQuestion() {
       return {
-        id,
         text: '',
-        options: [this.createResponse(1)],
-        correctResponseIds: []
+        options: [{text: ''}],
+        correct: []
       };
-    },
-    createResponse(id) {
-      return { id, text: '' };
     },
     removeResponse(responseIndex, questionIndex) {
       const question = this.questions[questionIndex];
@@ -145,6 +126,34 @@ export default {
     },
     selectQuestion(index) {
       this.selectedQuestionIndex = index;
+    },
+    async submitQuiz() {
+      const uid = this.user.uid;
+      const quizData = {
+        author: uid,
+        title: this.title,
+        category: this.category,
+        difficulty: this.difficulty,
+        description: this.description,
+        questions: this.questions.map((question) => {
+          return {
+            text: question.text,
+            options: question.options.map((option) => {
+              return option.text;
+            }),
+            correct: question.correct
+          };
+        }),
+        players: []
+      };
+      const Ref = await app.collection('quizzes').add(quizData);
+      const quizID = Ref.id;
+      const author = app.collection('users').doc(uid);
+      const user = await author.get();
+      const currentQuizzes = (user.data().created_quizzes == null) ? user.data().quizzes : [];
+      currentQuizzes.push(quizID);
+      await author.update({ created_quizzes: currentQuizzes });
+      this.$router.push("/home");
     }
   }
 };

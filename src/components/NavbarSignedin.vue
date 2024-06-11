@@ -21,7 +21,7 @@
         <div class="links">
             <router-link to="/leaderboard" class="leaderboard-phone"><font-awesome-icon
                     :icon="['fas', 'ranking-star']" /></router-link>
-            <router-link class="rm leaderboard-desktop" to="leaderboard/">Standings</router-link>
+            <router-link class="rm leaderboard-desktop" to="/leaderboard">Standings</router-link>
             <router-link :to="`/profile/${userid}`" class="account-desktop">Account</router-link>
             <router-link :to="`/profile/${userid}`"><font-awesome-icon :icon="['fas', 'user']"
                     class="account-phone" /></router-link>

@@ -1,100 +1,113 @@
 <template>
   <NavbarSignedin />
   <div class="leaderboard-container">
-    <h1 class="leaderboard-title">Leaderboard</h1>
-    <table class="table">
-      <thead>
-        <tr>
-          <th scope="col">Rank</th>
-          <th scope="col">Name</th>
-          <th scope="col">Score</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(player, index) in players.slice(0, 10)" :key="player.username">
-          <td>{{ index + 1 }}</td>
-          <td>{{ player.username }}</td>
-          <td>{{ player.score }}</td>
-        </tr>
-      </tbody>
-    </table>
+      <h1 class="leaderboard-title">Leaderboard</h1>
+      <table class="table">
+          <thead>
+              <tr>
+                  <th scope="col">Rank</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Score</th>
+              </tr>
+          </thead>
+          <tbody>
+              <tr v-for="(player, index) in players.slice(0, 10)" :key="player.username" :class="{
+                  'first-rank': index === 0,
+                  'second-rank': index === 1,
+                  'third-rank': index === 2,
+              }">
+                  <td>
+                      <span class="rank-number">{{ index + 1 }}</span>
+                      <span v-if="index === 0">🥇</span>
+                      <span v-if="index === 1">🥈</span>
+                      <span v-if="index === 2">🥉</span>
+                  </td>
+                  <td>{{ player.player }}</td>
+                  <td>{{ player.score }}</td>
+              </tr>
+              <tr class="user-score">
+                  <td>{{ user.index }}</td>
+                  <td>{{ user.player }}</td>
+                  <td>{{ user.score }}</td>
+              </tr>
+          </tbody>
+      </table>
   </div>
 </template>
 
 <script>
 import NavbarSignedin from '@/components/NavbarSignedin.vue';
+import { getUser } from "@/composables/getUser";
+import { app } from '@/firebase/config';
+import getQuizzes from '@/composables/getQuizzes';
+
 export default {
   data() {
-    return {
-      players: [
-        { username: 'Alice', score: 300 },
-        { username: 'Bob', score: 500 },
-        { username: 'Charlie', score: 100 },
-        { username: 'David', score: 200 },
-        { username: 'Eve', score: 400 },
-        { username: 'Frank', score: 250 },
-        { username: 'Grace', score: 350 },
-        { username: 'Henry', score: 150 },
-        { username: 'Isabella', score: 450 },
-        { username: 'Jack', score: 100 },
-        { username: 'Kate', score: 550 },
-        { username: 'Liam', score: 50 },
-        { username: 'Mia', score: 600 },
-        { username: 'Nathan', score: 50 },
-      ].sort((a, b) => b.score - a.score),
-    };
+      return {
+          players: [],
+          user: { player: '', score: 0, index: 0 },
+      }
   },
   components: { NavbarSignedin },
+  computed: {
+      quizID() {
+          return this.$route.params.id;
+      },
+  },
+  async created() {
+      const user = getUser();
+      try {
+          const { quizzes, error, load } = getQuizzes();
+          await load();
+          this.players = quizzes.value.reduce((acc, quiz) => {
+              quiz.players.forEach(player => {
+                  const existingPlayer = acc.find(p => p.id === player.id);
+                  if (existingPlayer) {
+                      existingPlayer.score += player.score;
+                  } else {
+                      acc.push(player);
+                  }
+              });
+              return acc;
+          }, []);
+          this.players = this.players.sort((a, b) => b.score - a.score);
+          console.log(this.players);
+          if (user) {
+              this.players.find((player, index) => {
+                  if (player.id === user.uid) {
+                      this.user.player = player.player;
+                      this.user.score = player.score;
+                      this.user.index = index + 1;
+                  };
+              })
+          };
+      } catch(error) {
+      console.log(error);
+  }
+}
 };
 </script>
 
 <style scoped>
-
 .leaderboard-container {
-  background: linear-gradient(135deg,#429af8, #ab9cfc);
-  color: #333333;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  animation: fadeIn 0.3s ease-in-out;
+  background: linear-gradient(135deg, #429af8, #ab9cfc);
+  color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
   max-width: 800px;
-  margin: 100px auto;
-  padding: 2rem;
-}
-
-.table tbody tr:hover {
-  background-color: #429af8;
-  color: #fff;
-  transform: scale(1.02);
-} 
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  margin: 60px auto;
+  padding: 2.5rem;
+  animation: fadeIn 0.6s ease-in-out;
 }
 
 .leaderboard-title {
-  color: #fff;
-  font-weight: 700;
-  margin-bottom: 20px;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 2.5rem;
+  margin-bottom: 30px;
   text-align: center;
-  animation: slideIn 0.3s ease-in-out;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateY(-20px);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  animation: slideIn 0.6s ease-in-out;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .table {
@@ -103,23 +116,109 @@ export default {
   margin-bottom: 0;
 }
 
-.table td, th {
-  padding: 10px;
+.table th,
+.table td {
+  padding: 15px;
   text-align: center;
   transition: background-color 0.3s, color 0.3s;
 }
 
-.table tbody tr td:first-child {
-  text-align: center;
-  font-weight: bold;
-}
-
-.table tbody tr:hover td {
-  background-color: #EF42BA;
-  cursor: pointer;
+.table thead th {
+  background-color: #429af8;
+  /* Dodger Blue */
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1.2rem;
+  text-transform: uppercase;
 }
 
 .table tbody tr {
-  transition: transform 0.3s, background-color 0.3s, color 0.3s;
+  background-color: #ffffff;
+  color: #333;
+  border-bottom: 1px solid #ccc;
+}
+
+.table tbody tr:nth-child(odd) {
+  background-color: #f2f2f2;
+}
+
+.table tbody tr:hover {
+  background-color: #ff1493;
+  color: #ffffff;
+  transform: scale(1.02);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.rank-number {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 50%;
+  background-color: #fff;
+  color: #333;
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.first-rank {
+  background-color: #ffd700;
+  color: #333;
+  font-weight: bold;
+  animation: shine 1s infinite;
+}
+
+.second-rank {
+  background-color: #c0c0c0;
+  color: #333;
+  font-weight: bold;
+  animation: shine 1s infinite;
+}
+
+.third-rank {
+  background-color: #cd7f32;
+  color: #333;
+  font-weight: bold;
+  animation: shine 1s infinite;
+}
+
+.user-score {
+  background-color: #ccc;
+}
+
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+  }
+
+  to {
+      opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+      transform: translateY(-20px);
+      opacity: 0;
+  }
+
+  to {
+      transform: translateY(0);
+      opacity: 1;
+  }
+}
+
+@keyframes shine {
+  0% {
+      box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  }
+
+  50% {
+      box-shadow: 0 0 20px rgba(255, 215, 0, 1);
+  }
+
+  100% {
+      box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  }
 }
 </style>
