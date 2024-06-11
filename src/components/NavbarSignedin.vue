@@ -11,7 +11,7 @@
                 @keyup.enter="search">
             <font-awesome-icon :icon="['fas', 'caret-down']" class="fa-icon" @mouseenter="show = true" />
             <div class="dropdown-menu" v-show="show" @mouseleave="show = false">
-                <p class="choice" v-for="choice in choices">{{ choice }}</p>
+                <p class="choice"  v-for="choice in choices" @click="filter(choice)">{{ choice }}</p>
             </div>
             <button class="browse-btn" @click="search">Browse</button>
         </div>
@@ -25,12 +25,19 @@
 import { getUser } from '@/composables/getUser';
 
 export default {
+    emits: ['search', 'filter'],
+    props : {
+        quizzes: {
+            type: Array,
+            required: true
+        }
+    } ,
     data() {
         return {
             userid: '',
             show: false,
             searchquery: '',
-            quizzes: null,
+            category: '',
             choices: ["General Knowledge", "Science & Nature", "History & Geography", "Entertainment & Pop Culture", "Sports & Recreation", "Literature & Arts"]
         }
     },
@@ -39,25 +46,21 @@ export default {
         if (user) {
             this.userid = user.uid;
         }
-        await this.getQuizList();
     },
     methods: {
-        async getQuizList() {
-            try {
-                const { quizzes, error, load } = getQuizzes();
-                await load();
-                this.quizzes = quizzes.value;
-            }
-            catch (error) {
-                console.log(error);
-            }
-        },
         search() {
             const query = this.searchquery.toLowerCase();
-            console.log("quizzes: ", this.quizzes);
-            return this.quizzes.filter(quiz => {
+            const filtered_quizzes = this.quizzes.filter(quiz => {
                 return quiz.title.toLowerCase().includes(query) || quiz.description.toLowerCase().includes(query);
             });
+            this.$emit('search', filtered_quizzes);
+        },
+        filter(query) {
+            console.log(query);
+            const filtered_quizzes = this.quizzes.filter(quiz => {
+                return quiz.category.includes(query);
+            });
+            this.$emit('filter', filtered_quizzes);
         }
     }
 }

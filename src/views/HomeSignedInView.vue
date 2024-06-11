@@ -1,15 +1,16 @@
 <template>
-  <NavbarSignedin />
+  <NavbarSignedin :quizzes="quizzes" @search="handleSearch" @filter="handleFilter" />
   <div class="home-container">
     <div class="home-panel">
-      <h2 class="home-title">Trending quizzes in your feed</h2>
+      <h2 class="home-title" v-show="!search">Trending quizzes in your feed</h2>
+      <h2 class="home-title" v-show="search">Search Results</h2>
       <router-link to="/createquiz" v-if="isAdmin" class="create-form-btn">Create New</router-link>
     </div>
     <button @click="add">add</button>
     <div class="quizzes-container">
-      <router-link v-for="(quiz, index) in quizzes" :key="index" :to="`/quiz/${quiz.id}`"
-        class="quiz-card" @mouseenter="(event) => quizhover(event)" @mouseleave="(event) => quizregular(event, index)">
-        <div class="quiz-title">{{ quiz.title }}</div>
+      <router-link v-for="(quiz, index) in filteredQuizzes" :key="index" :to="`/quiz/${quiz.id}`" class="quiz-card"
+        @mouseenter="(event) => quizhover(event, index)" @mouseleave="(event) => quizregular(event, index)">
+        <div class="quiz-title" v-html="quiz.title"></div>
         <img :src="quiz.url" class="quiz-image" />
       </router-link>
     </div>
@@ -20,6 +21,8 @@
 import NavbarSignedin from "@/components/NavbarSignedin.vue";
 import addQuizzesToFirestore from "@/composables/data";
 import getQuizzes from "@/composables/getQuizzes";
+import { getUser } from "@/composables/getUser";
+import { app } from "@/firebase/config";
 
 export default {
   name: "HomeSignedInView",
@@ -28,27 +31,52 @@ export default {
   },
   async created() {
     await this.getQuizList();
+    const user = getUser();
+    const userRole = (await app.collection("users").doc(user.uid).get()).data().role;
+    this.isAdmin = userRole === "admin";
   },
   data() {
     return {
-      quizzes: "",
-      isAdmin: true,
+      quizzes: [],
+      filtered: [],
+      search: false,
+      filter: false,
+      isAdmin: false,
     };
   },
+  computed: {
+    filteredQuizzes() {
+      return this.search || this.filter ? this.filtered : this.quizzes;
+    }
+  },
   methods: {
-    quizhover(event) {
-      event.target.querySelector(".quiz-title").textContent = "Take Quiz";
-      event.target.querySelector(".quiz-title").style.mixBlendMode = "normal";
+    quizhover(event, index) {
+      const quiz = this.quizzes[index];
+      const quizTitleElement = event.target.querySelector(".quiz-title");
+      quizTitleElement.innerHTML =
+        'Difficulty Level: ' + quiz.difficulty + '<br>' +
+        quiz.description + '<br>' +
+        'Number of Questions: ' + quiz.questions.length;
+      quizTitleElement.style.mixBlendMode = "normal";
+      quizTitleElement.style.textAlign = "left";
+      quizTitleElement.style.fontSize = "12px";
+      quizTitleElement.style.padding = "12px";
+
       event.target.querySelector(".quiz-image").style.display = "none";
-      event.target.style.background =
-        "linear-gradient(90deg, #ef42ba, #735def)";
+      event.target.style.background = "linear-gradient(90deg, #ef42ba, #735def)";
     },
+
     quizregular(event, idx) {
-      event.target.querySelector(".quiz-title").textContent = this.quizzes[idx].title;
+      const quiz = this.quizzes[idx];
+      const quizTitleElement = event.target.querySelector(".quiz-title");
+      quizTitleElement.innerHTML = quiz.title;
+      quizTitleElement.style.textAlign = "center";
+      quizTitleElement.style.mixBlendMode = "difference";
+      quizTitleElement.style.fontSize = "1.5em";
       event.target.querySelector(".quiz-image").style.display = "block";
-      event.target.querySelector(".quiz-title").style.mixBlendMode = "difference";
       event.target.style.background = "#fefefe";
     },
+
     add() {
       addQuizzesToFirestore();
     },
@@ -61,6 +89,14 @@ export default {
       catch (error) {
         console.log(error);
       }
+    },
+    handleSearch(filtered_quizzes) {
+      this.search = true;
+      this.filtered = filtered_quizzes;
+    },
+    handleFilter(filtered_quizzes) {
+      this.filter = true;
+      this.filtered = filtered_quizzes;
     }
   }
 };
@@ -104,7 +140,7 @@ export default {
   width: 300px;
   height: 200px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
   text-align: center;
   cursor: pointer;
 }
@@ -112,6 +148,7 @@ export default {
 .quiz-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(90deg, #ef42ba, #735def);
 }
 
 .quiz-title {
@@ -125,6 +162,12 @@ export default {
   transform: translate(-50%, -50%);
   z-index: 1;
   width: 100%;
+  transition: font-size 0.3s ease, mix-blend-mode 0.3s ease;
+}
+
+.quiz-card:hover .quiz-title {
+  mix-blend-mode: normal;
+  font-size: 12px;
 }
 
 .quiz-image {
@@ -135,6 +178,11 @@ export default {
   max-width: 100%;
   max-height: 100%;
   filter: blur(3px);
+  transition: display 0.3s ease;
+}
+
+.quiz-card:hover .quiz-image {
+  display: none;
 }
 
 .create-form-btn {

@@ -1,180 +1,280 @@
 <template>
-  <div id="app" class="d-flex flex-column align-items-center justify-content-center min-vh-100">
-    <div id="quiz-container" class="container mt-5 p-4 rounded shadow">
-      <div class="text-center mb-4">
-        <img src="@/assets/logo.png" class="logo" alt="Logo">
+  <div class="quiz-container">
+    <form @submit.prevent="submitQuiz" class="form-container">
+      <div class="create-quiz">
+        <img src="@/assets/logo.png" class="logo" alt="Logo" />
+        <h2 class="title">Create a Quiz</h2>
+        <input type="submit" value="Add Quiz" class="submit-button" />
       </div>
-      <h2 class="text-center text-primary mb-4">Create a Quiz</h2>
-      <div class="form-group mb-4">
-        <label for="title" class="form-label">Quiz Title:</label>
-        <input v-model="title" id="title" type="text" class="form-control border border-info" placeholder="Enter quiz title" />
-      </div>
-      <div class="form-group mb-4">
-        <label for="category" class="form-label">Select Category:</label>
-        <select v-model="selectedCategory" id="category" class="form-select border border-info">
+
+      <div class="quiz-info">
+        <h2>Quiz Information</h2>
+        <input v-model="title" id="title" type="text" placeholder="Enter quiz title" required class="form-control" />
+        <select v-model="category" id="category" required class="form-control">
           <option value="" disabled>Select a category</option>
           <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
         </select>
-      </div>
-      <div class="form-group mb-4">
-        <label for="difficulty" class="form-label">Select Difficulty Level:</label>
-        <select v-model="selectedDifficulty" id="difficulty" class="form-select border border-info">
+
+        <select v-model="difficulty" id="difficulty" required class="form-control">
+          <option value="" disabled>Select a difficulty</option>
           <option value="easy">Easy</option>
           <option value="medium">Medium</option>
           <option value="hard">Hard</option>
         </select>
+
+        <textarea v-model="description" id="description" rows="2" placeholder="Enter quiz description"
+          class="form-control"></textarea>
       </div>
-      <div class="form-group mb-4">
-        <label for="description" class="form-label">Quiz Description:</label>
-        <textarea v-model="description" id="description" rows="4" class="form-control border border-info" placeholder="Enter quiz description"></textarea>
+
+      <div class="questions-index">
+        <button type="button" @click="addQuestion" class="add-question-button">Add Question</button>
+        <ul :class="['question-index', { 'scrollable': questions.length > 5 }]">
+          <li v-for="(question, index) in questions" :key="index">
+            <button type="button" @click="selectQuestion(index)" class="index-button">
+              Question {{ index + 1 }}
+            </button>
+            <font-awesome-icon @click="removeQuestion(index)" v-if="questions.length > 1"
+              :icon="['fas', 'window-close']" />
+          </li>
+        </ul>
       </div>
-      <div id="question-container" class="mb-4">
-        <div v-for="(question, index) in questions" :key="question.id" class="question-block p-3 rounded mb-3 shadow-sm border border-info">
-          <h4 class="text-secondary">Question {{ index + 1 }}</h4>
-          <input v-model="question.text" type="text" :placeholder="'Enter question ' + (index + 1) + ' text'" class="form-control mb-3 border border-info" />
-          <ul class="list-unstyled">
-            <li v-for="(response, responseIndex) in question.responses" :key="response.id" class="mb-2">
-              <input v-model="response.text" type="text" :placeholder="'Enter response ' + (responseIndex + 1)" class="form-control mb-2 border border-info" />
-              <div class="form-check">
-                <input type="checkbox" :value="response.id" v-model="question.correctResponseIds" class="form-check-input border border-info" />
-                <label class="form-check-label">Correct</label>
-              </div>
-            </li>
-          </ul>
-          <button class="btn btn-sm btn-outline-success mt-2" @click="addResponse(question.id)">
-            <i class="fas fa-plus"></i> Add Response
-          </button>
-        </div>
+
+      <div v-if="selectedQuestionIndex !== null" class="edit-question">
+        <h2>Editing Question {{ selectedQuestionIndex + 1 }}</h2>
+        <input v-model="selectedQuestion.text" type="text" placeholder="Enter question text" required
+          class="form-control" />
+        <ul>
+          <li v-for="(response, responseIndex) in selectedQuestion.options" :key="responseIndex" class="response-item">
+            <font-awesome-icon @click="addResponse(selectedQuestionIndex)" class="add-response-button"
+              :icon="['fas', 'plus']" />
+            <input v-model="response.text" type="text" :placeholder="'Enter response ' + (responseIndex + 1)" required
+              class="form-control" />
+            <input type="checkbox" class="correct" :value="response" v-model="selectedQuestion.correct" />
+            <font-awesome-icon class="remove-response-button" @click="removeResponse(responseIndex, selectedQuestionIndex)"
+              v-if="selectedQuestion.options.length > 1" :icon="['fas', 'window-close']" />
+          </li>
+        </ul>
       </div>
-      <button class="btn btn-outline-primary btn-block mb-3" @click="addQuestion">
-        <i class="fas fa-plus"></i> Add Question
-      </button>
-      <br>
-      <button class="btn btn-success btn-block" @click="submitQuiz" :disabled="!isFormValid">
-        <i class="fas fa-paper-plane"></i> Submit Quiz
-      </button>
-    </div>
+    </form>
   </div>
 </template>
 
 <script>
+import { app } from "@/firebase/config";
+import getUser from "@/composables/addUser";
 export default {
   name: "CreateQuizView",
   data() {
     return {
-      categories: [
-        'Exciting Biology', 'Captivating Chemistry', 'Phenomenal Physics', 'Marvelous Mathematics', 'World Wonders History', 'Global Geography', 'Provocative Philosophy', 'Amazing Art History'
-      ],
+      categories: ["General Knowledge", "Science & Nature", "History & Geography", "Entertainment & Pop Culture", "Sports & Recreation", "Literature & Arts"],
       title: '',
-      selectedCategory: '',
-      selectedDifficulty: '',
+      category: '',
+      difficulty: '',
       description: '',
       questions: [
         {
-          id: 1,
           text: '',
-          responses: [{ id: 1, text: '' }],
-          correctResponseIds: []
+          options: [{ text: '' }],
+          correct: []
         }
       ],
-      nextQuestionId: 2
+      selectedQuestionIndex: 0
     };
   },
   computed: {
-    isFormValid() {
-      return (
-        this.title &&
-        this.selectedCategory &&
-        this.selectedDifficulty &&
-        this.description &&
-        this.questions.length > 0 &&
-        this.questions.every(q => q.text.trim() !== '' && q.responses.some(r => r.text.trim() !== ''))
-      );
+    selectedQuestion() {
+      if (this.selectedQuestionIndex !== null) {
+        return this.questions[this.selectedQuestionIndex];
+      }
+      return null;
     }
   },
   methods: {
     addQuestion() {
       this.questions.push(this.createQuestion(this.nextQuestionId++));
     },
-    addResponse(questionId) {
-      const question = this.questions.find(q => q.id === questionId);
-      if (question) {
-        question.responses.push(this.createResponse(question.responses.length + 1));
+    addResponse(idx) {
+      const question = this.questions[idx];
+      if (question.options.length < 4) {
+        question.options.push(this.createResponse(question.options.length + 1));
       }
     },
-    submitQuiz() {
-      if (this.isFormValid) {
-        console.log("Quiz submitted!", {
-          title: this.title,
-          category: this.selectedCategory,
-          difficulty: this.selectedDifficulty,
-          description: this.description,
-          questions: this.questions
-        });
-      } else {
-        alert("Please fill out all required fields and select correct answers.");
-      }
+    async submitQuiz() {
+      const uid = await getUser().uid;
+      console.log(uid);
+      const quizData = {
+        title: this.title,
+        category: this.selectedCategory,
+        difficulty: this.selectedDifficulty,
+        description: this.description,
+        questions: this.questions
+      };
+      const Ref = await app.collection('quizzes').add(quizData);
+      const quizID = Ref.id;
+      const author = app.collection('users').doc(uid);
+      const user = await author.get();
+      const currentQuizzes = (user.data().quizzes == null) ? user.data().quizzes : [];
+
+      currentQuizzes.push(quizID);
+      await usersRef.update({ quizzes: currentQuizzes });
+
+      this.$router.push("/home");
     },
     createQuestion(id) {
       return {
         id,
         text: '',
-        responses: [this.createResponse(1)],
+        options: [this.createResponse(1)],
         correctResponseIds: []
       };
     },
     createResponse(id) {
       return { id, text: '' };
+    },
+    removeResponse(responseIndex, questionIndex) {
+      const question = this.questions[questionIndex];
+      if (question) {
+        question.options.splice(responseIndex, 1);
+      }
+    },
+    removeQuestion(index) {
+      this.questions.splice(index, 1);
+      if (this.selectedQuestionIndex === index) {
+        this.selectedQuestionIndex = null;
+      }
+    },
+    selectQuestion(index) {
+      this.selectedQuestionIndex = index;
     }
   }
 };
 </script>
 
 
-
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Poppins:wght@400;600;700&display=swap');
-@import "~bootstrap/dist/css/bootstrap.min.css";
-@import "~@fortawesome/fontawesome-free/css/all.min.css";
-
-:root {
-  --primary-color: #429AF8; /* Dodger Blue */
-  --secondary-color: #EF42BA; /* Shocking Pink */
-  --tertiary-color: #F59931; /* Carrot Orange */
-  --quaternary-color: #735DEF; /* Medium Slate Blue */
-  --background-color: #FEFEFE; /* White */
-  --text-color: #343a40;
-  --border-color: #dee2e6;
-  --hover-color: #f5f5f5;
-  --transition-duration: 0.3s;
-  --shadow-color: rgba(0, 0, 0, 0.1);
-}
-
-body {
-  font-family: 'Poppins', sans-serif;
-  margin: 0;
-  min-height: 100vh;
-  background: linear-gradient(45deg, #EF42BA, #735DEF, #429AF8, #F59931);
-  background-size: 400% 400%;
-  animation: gradientBG 15s ease infinite;
-  color: var(--text-color);
-}
-
-@keyframes gradientBG {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-#quiz-container {
-  background-color: var(--background-color);
-  border: 2px solid var(--primary-color);
+.quiz-container {
   border-radius: 15px;
   padding: 30px;
-  max-width: 800px;
-  width: 100%;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   animation: fadeIn 1s ease;
+  margin: 50px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1200px;
+}
+
+.form-container {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+}
+
+@media screen and (min-width: 992px) {
+  .form-container {
+    grid-template-columns: 1.1fr 1.3fr 0.6fr;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      "create-quiz create-quiz create-quiz"
+      "quiz-info edit-question questions-index";
+  }
+}
+
+@media screen and (min-width: 768px) and (max-width: 992px) {
+  .form-container {
+    grid-template-columns: 1.7fr 0.7fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "create-quiz create-quiz"
+      "quiz-info quiz-info"
+      "edit-question questions-index";
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .form-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+      "create-quiz"
+      "quiz-info"
+      "questions-index"
+      "edit-question";
+    gap: 15px;
+  }
+}
+
+.create-quiz {
+  grid-area: create-quiz;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.quiz-info {
+  grid-area: quiz-info;
+  padding: 20px;
+  background: #f8f8f8;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quiz-info h2 {
+  font-weight: 700;
+  color: #735DEF;
+  font-size: 1.5em;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.questions-index {
+  grid-area: questions-index;
+  background: #f8f8f8;
+  padding: 5px 8px;
+  border-radius: 10px;
+}
+
+.questions-index ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  height: 300px;
+  overflow-y: scroll;
+}
+
+.questions-index li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 5px;
+  background: #fff;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+
+.questions-index li:hover {
+  background: #735DEF;
+  color: #fff;
+}
+
+.edit-question {
+  grid-area: edit-question;
+  background: #735DEF;
+  padding: 20px;
+  border-radius: 10px;
+  color: #fff;
+}
+
+.edit-question h2 {
+  font-weight: 700;
+  font-size: 1.5em;
+  margin-bottom: 10px;
+  text-align: center;
 }
 
 @keyframes fadeIn {
@@ -182,6 +282,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -190,7 +291,8 @@ body {
 
 .logo {
   max-width: 150px;
-  margin-bottom: 20px;
+  width: 70px;
+  margin-right: 10px;
   transition: transform 0.3s;
 }
 
@@ -198,192 +300,113 @@ body {
   transform: scale(1.1);
 }
 
-h2 {
-  margin-bottom: 30px;
-  color: var(--primary-color);
+.title {
+  margin-bottom: 10px;
+  color: #735DEF;
   font-weight: 700;
   position: relative;
   font-size: 2rem;
 }
 
-h2::after {
-  content: '';
-  width: 60px;
-  height: 4px;
-  background-color: var(--secondary-color);
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: var(--quaternary-color);
-}
-
-.form-control, .form-select {
-  transition: box-shadow var(--transition-duration);
+.submit-button {
+  background-color: #F59931;
+  color: #fff;
+  border: none;
   border-radius: 10px;
-  padding: 10px 15px;
-  margin-bottom: 20px;
-  font-size: 1rem;
-  border: 2px solid var(--secondary-color);
+  padding: 10px 20px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: transform 0.3s, background-color 0.3s;
 }
 
-.form-control:focus, .form-select:focus {
-  box-shadow: 0 0 8px rgba(66, 154, 248, 0.5);
-  border-color: var(--secondary-color);
+.submit-button:hover {
+  transform: scale(1.05);
+  background-color: #EF42BA;
 }
 
-textarea.form-control {
-  resize: none;
-}
-
-.form-select:hover {
-  border-color: var(--tertiary-color);
-}
-
-.form-select option:hover {
-  background-color: var(--hover-color);
-}
-
-.question-block {
-  border: 2px solid var(--tertiary-color);
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  background-color: var(--background-color);
-  position: relative;
-  margin-bottom: 20px;
-}
-
-.question-block h4 {
-  margin-bottom: 15px;
-  font-weight: 500;
-  color: var(--tertiary-color);
-  position: relative;
-}
-
-.question-block h4::before {
-  content: '';
-  width: 10px;
-  height: 100%;
-  background-color: var(--primary-color);
-  position: absolute;
-  left: -20px;
-  top: 0;
-  transition: left var(--transition-duration);
-}
-
-.question-block:hover h4::before {
-  left: 0;
-}
-
-.question-block input, .question-block textarea {
-  margin-bottom: 10px;
+.form-control {
   width: 100%;
   padding: 10px;
-  border: 2px solid var(--quaternary-color);
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid #735DEF;
+  transition: box-shadow 0.3s;
 }
 
-.question-block input:focus, .question-block textarea:focus {
+.form-control:focus {
   box-shadow: 0 0 8px rgba(66, 154, 248, 0.5);
-  border-color: var(--quaternary-color);
+  border: 1px solid transparent;
 }
 
-.form-check-input {
-  margin-top: 0.3rem;
-  margin-left: 0;
+select {
+  cursor: pointer;
 }
 
-.form-check-label {
-  margin-left: 1.25rem;
-  margin-bottom: 0;
-}
-
-.form-check-input:focus {
-  border-color: var(--tertiary-color);
-  box-shadow: 0 0 5px rgba(245, 153, 49, 0.5);
-}
-
-.btn {
+.index-button {
   padding: 10px 20px;
   font-size: 1rem;
   border-radius: 8px;
   font-weight: 600;
   letter-spacing: 0.5px;
-  transition: background-color var(--transition-duration), box-shadow var(--transition-duration);
+  cursor: pointer;
+  border: none;
+  color: inherit;
+  background-color: inherit;
 }
 
-.btn:hover {
-  box-shadow: 0 4px 8px var(--shadow-color);
+.add-question-button,
+.add-response-button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background-color: #735DEF;
+  color: #fff;
+  margin: 10px auto;
+  transition: background-color 0.3s;
 }
 
-.btn-outline-success {
-  border-color: var(--secondary-color);
-  color: var(--secondary-color);
+.add-question-button:hover,
+.add-response-button:hover {
+  background-color: #F59931;
 }
 
-.btn-outline-success:hover {
-  background-color: var(--secondary-color);
-  color: var(--background-color);
+.add-response-button {
+  padding: 10px 12px;
+  border-radius: 50px;
 }
 
-.btn-outline-primary {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
+.response-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 
-.btn-outline-primary:hover {
-  background-color: var(--primary-color);
-  color: var(--background-color);
+.correct {
+  cursor: pointer;
+  padding: 20px;
+  border: 2px solid #ddd;
 }
 
-.btn-success {
-  background-color: var(--secondary-color);
-  border-color: var(--secondary-color);
+.correct:checked {
+  border: none;
+  padding: 20px;
 }
 
-.btn-success:hover {
-  background-color: var(--quaternary-color);
-  border-color: var(--quaternary-color);
+.remove-response-button {
+  border-radius: 10px;
+  padding: 2px 8px;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
 }
 
-#question-container {
-  max-height: 400px;
-  overflow-y: auto;
-  padding-right: 10px;
-}
-
-#question-container::-webkit-scrollbar {
-  width: 6px;
-}
-
-#question-container::-webkit-scrollbar-thumb {
-  background-color: var(--primary-color);
-  border-radius: 3px;
-}
-
-#question-container::-webkit-scrollbar-track {
-  background-color: var(--background-color);
-}
-
-@media (max-width: 768px) {
-  #quiz-container {
-    padding: 20px;
-  }
-
-  .question-block {
-    padding: 15px;
-  }
+.remove-response-button:hover {
+  color: #EF42BA;
 }
 </style>

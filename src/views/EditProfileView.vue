@@ -1,10 +1,5 @@
 <template>
-    <div class="signup-container">
-      <h3 class="title-signup" v-show="completeSignUp">
-        Almost there, how about customizing your experience?
-      </h3>
       <form @submit.prevent="editProfile">
-        <label for="categories">Choose at least 1 quiz category</label>
         <multiselect
           id="categories"
           :multiple="true"
@@ -13,17 +8,14 @@
           v-model="categories"
           :options="options"
         ></multiselect>
-        <label for="description">Description</label>
         <textarea
           id="description"
           v-model="description"
           placeholder="Tell us about yourself"
         ></textarea>
-        <label for="profile-image">Profile Image</label>
         <input type="file" id="profile-image" @change="uploadImage" />
         <input type="submit" value="Confirm Changes" class="submit-button" />
       </form>
-    </div>
   </template>
   
   <script>
@@ -36,7 +28,6 @@
     components: { Multiselect },
     data() {
       return {
-        completeSignUp: true,
         categories: null,
         options: [
           'General Knowledge',

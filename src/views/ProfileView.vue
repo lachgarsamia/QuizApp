@@ -1,16 +1,13 @@
 <template>
     <div class="profile-container">
         <router-link :to="`/editprofile/${userid}`" class="edit-profile-btn">Edit Profile</router-link>
-        <h2 class="profile-title">Your Profile</h2>
-        <div class="profile-line">
+        <h2 class="profile-title">Welcome {{ username }}</h2>
+        <div class="profile-header">
             <div class="profile-info">
                 <img :src="photoURL" alt="Profile Picture" class="profile-picture" />
-                <p class="username">{{ username }}</p>
-                <p class="description">{{ description }}</p>
-                <div class="categories">
-                    <div class="category" v-for="category in categories" :key="category">
-                        {{ category }}
-                    </div>
+                <div class="profile-details">
+                    <p class="username">{{ username }}</p>
+                    <p class="description">{{ description }}</p>
                 </div>
             </div>
             <div class="best-standing">
@@ -18,8 +15,16 @@
                 <p>in {{ quiz_title }}</p>
             </div>
         </div>
+        <div class="categories-container">
+            <h3 class="categories-title">Categories</h3>
+            <div class="categories">
+                <div class="category" v-for="category in categories" :key="category">
+                    {{ category }}
+                </div>
+            </div>
+        </div>
         <div class="quizzes-taken">
-            <p class="profile-title">Participated in {{ quizzes_taken.length }} Quizzes</p>
+            <h3 class="profile-title">Participated in {{ quizzes_taken.length }} Quizzes</h3>
             <div class="quizzes-grid">
                 <div v-for="(quiz, index) in quizzes_taken" :key="index" class="quiz-card">
                     <div class="card">
@@ -65,7 +70,7 @@ export default {
       const quizlist = ref.data().quizzes_taken;
       for (const quizID of quizlist) {
         try{
-          const res = await app.collection('quizzes').doc(quizID).get()
+          const res = await app.collection('quizzes').doc(quizID).get();
           const quiz = res.data();
           this.quizzes.push(quiz);
         }
@@ -95,7 +100,8 @@ export default {
 };
 </script>
 
-<style>
+
+<style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
 :root {
@@ -112,74 +118,76 @@ export default {
 
 body {
     font-family: 'Roboto', sans-serif;
-    color: lightblue;
+    color: var(--text-color);
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    background:linear-gradient(135deg, var(--gradient-start), var(--gradient-end));;
 }
 
 .profile-container {
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 20px;
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 30px;
     background-color: var(--background-color);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
 }
 
 .edit-profile-btn {
     display: inline-block;
     margin-bottom: 20px;
-    padding: 10px 20px;
+    padding: 12px 25px;
     background-color: var(--primary-color);
     color: var(--background-color);
     text-decoration: none;
     border-radius: 5px;
     text-align: center;
-    transition: background-color var(--transition-speed);
+    font-weight: 500;
+    transition: background-color var(--transition-speed), transform var(--transition-speed);
 }
 
 .edit-profile-btn:hover {
     background-color: var(--secondary-color);
+    transform: translateY(-2px);
 }
 
 .profile-title {
-    font-size: 36px;
-    font-weight: bold;
+    font-size: 32px;
+    font-weight: 700;
     margin-bottom: 20px;
-    color: dodgerblue;
+    color: var(--text-color);
     text-align: center;
 }
 
-.profile-line {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-    padding: 20px;
-    border-radius: 8px;
-    color: var(--background-color);
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background:linear-gradient(135deg, var(--gradient-start), var(--gradient-end));;
+    padding: 30px;
+    border-radius: 12px;
+    color: black;
     margin-bottom: 20px;
+
 }
 
 .profile-info {
-    text-align: center;
-    padding: 20px;
-    background: var(--background-color);
-    border-radius: 8px;
     display: flex;
-    flex-direction: column;
     align-items: center;
+}
+
+.profile-details {
+    margin-left: 20px;
 }
 
 .profile-picture {
     border-radius: 50%;
-    width: 100px;
-    height: 100px;
+    width: 180px;
+    height: 180px;
     object-fit: cover;
-    margin-bottom: 10px;
     transition: transform var(--transition-speed);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
 .profile-picture:hover {
@@ -187,38 +195,64 @@ body {
 }
 
 .username {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: bold;
-    margin-bottom: 10px;
-    color: var(--text-color);
+    margin-bottom: 5px;
+    color: var(--background-color);
 }
 
 .description {
-    font-size: 16px;
-    margin-bottom: 10px;
-    color: var(--text-color);
+    font-size: 18px;
+    color: var(--background-color);
 }
+
+.categories-container {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 20px; /* Added padding for better spacing */
+    background: rgb(232, 231, 231);
+    border: 5px solid transparent; /* Ensure the border has some space */
+    border-image: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)) 1; /* Gradient border */
+    border-radius: 60x; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Added shadow for better separation */
+}
+
+
+.categories-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 20px;
+    color: black; 
+    text-align: center; 
+    height: 100px;
+    width: 100px;
+    border-radius: 5%;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+
 
 .categories {
     display: flex;
     gap: 10px;
     justify-content: center;
-    margin-top: 10px;
     flex-wrap: wrap;
 }
 
 .category {
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-size: 12px;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 14px;
     font-weight: bold;
     background-color: var(--primary-color);
     color: var(--background-color);
-    transition: background-color var(--transition-speed);
+    transition: background-color var(--transition-speed), transform var(--transition-speed);
 }
 
 .category:hover {
     background-color: var(--secondary-color);
+    transform: translateY(-2px);
 }
 
 .best-standing {
@@ -228,7 +262,7 @@ body {
     justify-content: center;
     background-color: var(--primary-color);
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 12px;
     color: var(--background-color);
     text-align: center;
 }
@@ -244,29 +278,30 @@ body {
 
 .quizzes-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 20px;
 }
 
 .quiz-card {
-    background-color: var(--background-color);
+    background:  linear-gradient(135deg, var(--gradient-start), var(--gradient-end)) ;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
     text-align: center;
-    transition: transform var(--transition-speed);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
 }
 
 .quiz-card:hover {
     transform: translateY(-10px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
 .quiz-title {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
     margin-bottom: 10px;
-    color: rgb(9, 43, 130)
+    color: var(--text-color);
 }
 
 .quiz-image {
@@ -277,10 +312,8 @@ body {
 }
 
 .quiz-score {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     color: var(--text-color);
 }
-
 </style>
-
