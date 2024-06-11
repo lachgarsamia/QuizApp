@@ -1,5 +1,12 @@
 # quizz-app
 
+## admin account:
+email: ahmed.bentajer@gmail.com
+password: 123456
+
+## firebase link:
+quizz-app-a108c.web.app
+
 ## Project setup
 ```
 npm install
