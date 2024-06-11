@@ -1,4 +1,5 @@
 <template>
+  <NavbarSignedin />
       <form @submit.prevent="editProfile">
         <multiselect
           id="categories"
@@ -19,13 +20,14 @@
   </template>
   
   <script>
+  import NavbarSignedin from '@/components/NavbarSignedin.vue';
   import { app } from '@/firebase/config';
   import { storage } from '@/firebase/config';
   import Multiselect from 'vue-multiselect';
   import { isLogged, getUser } from '@/composables/getUser';
   
   export default {
-    components: { Multiselect },
+    components: { Multiselect, NavbarSignedin },
     data() {
       return {
         categories: null,

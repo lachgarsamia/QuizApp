@@ -1,6 +1,5 @@
 <template>
   <div class="container-fluid p-0">
-    <!-- Hero Section -->
     <section class="hero d-flex flex-column align-items-center justify-content-center text-center text-white position-relative w-100">
       <img src="@/assets/logo.png" alt="QuizzApp Logo" class="logo mb-4">
       <div class="hero-content">
@@ -13,7 +12,6 @@
       </div>
     </section>
 
-    <!-- Swiper Section -->
     <section class="quizzes py-5">
       <div class="container">
         <h2 class="text-center mb-5" editable="inline">Popular Quizzes</h2>

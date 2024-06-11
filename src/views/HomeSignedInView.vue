@@ -1,5 +1,5 @@
 <template>
-  <NavbarSignedin :quizzes="quizzes" @search="handleSearch" @filter="handleFilter" />
+  <NavbarSignedin :searchbar="searchbar" :quizzes="quizzes" @search="handleSearch" @filter="handleFilter" />
   <div class="home-container">
     <div class="home-panel">
       <h2 class="home-title" v-show="!search">Trending quizzes in your feed</h2>
@@ -42,6 +42,7 @@ export default {
       search: false,
       filter: false,
       isAdmin: false,
+      searchbar: true,
     };
   },
   computed: {

@@ -6,18 +6,26 @@
                 <p class="title-quizzapp"><span class="fancy">Quizz</span>App</p>
             </div>
         </router-link>
-        <div class="browse-bar">
+        <div class="browse-bar" v-show="searchbar">
             <input type="text" class="browse" placeholder="Search for a quiz.." v-model="searchquery"
                 @keyup.enter="search">
             <font-awesome-icon :icon="['fas', 'caret-down']" class="fa-icon" @mouseenter="show = true" />
             <div class="dropdown-menu" v-show="show" @mouseleave="show = false">
-                <p class="choice"  v-for="choice in choices" @click="filter(choice)">{{ choice }}</p>
+                <p class="choice" v-for="choice in choices" @click="filter(choice)">{{ choice }}</p>
             </div>
             <button class="browse-btn" @click="search">Browse</button>
         </div>
-        <router-link :to="`profile/${userid}`" class="account-desktop">Account</router-link>
-        <router-link :to="`profile/${userid}`"><font-awesome-icon :icon="['fas', 'user']"
-                class="account-phone" /></router-link>
+        <div v-show="!searchbar">
+            <router-link to="/home">Explore</router-link>
+        </div>
+        <div class="links">
+            <router-link to="leaderboard/" class="leaderboard-phone"><font-awesome-icon
+                    :icon="['fas', 'ranking-star']" /></router-link>
+            <router-link class="rm leaderboard-desktop" to="leaderboard/">Standings</router-link>
+            <router-link :to="`profile/${userid}`" class="account-desktop">Account</router-link>
+            <router-link :to="`profile/${userid}`"><font-awesome-icon :icon="['fas', 'user']"
+                    class="account-phone" /></router-link>
+        </div>
     </div>
 </template>
 
@@ -26,12 +34,17 @@ import { getUser } from '@/composables/getUser';
 
 export default {
     emits: ['search', 'filter'],
-    props : {
+    props: {
         quizzes: {
             type: Array,
             required: true
+        },
+        searchbar: {
+            type: Boolean,
+            default: false
         }
-    } ,
+    }
+    ,
     data() {
         return {
             userid: '',
@@ -236,7 +249,24 @@ export default {
     display: none;
 }
 
-@media (max-width: 768px) {
+.leaderboard-desktop {
+    text-decoration: none;
+    background-color: #F59931;
+    border: 2px solid #F59931;
+    color: #fff;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    padding: 10px 20px;
+    margin-right: 50px;
+}
+
+.leaderboard-phone {
+    display: none;
+}
+
+@media (max-width: 992px) {
     .custom-container {
         height: auto;
         padding: 10px;
@@ -267,6 +297,19 @@ export default {
 
     .account-phone {
         display: block;
+        color: #1b0f61;
+        font-size: 1.5em;
+    }
+
+    .leaderboard-desktop {
+        display: none;
+    }
+
+    .leaderboard-phone {
+        display: block;
+        margin: 15px;
+        color: #1b0f61;
+        font-size: 1.5em;
     }
 }
 
