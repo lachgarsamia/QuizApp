@@ -20,7 +20,7 @@ const routes = [
   { path: '/leaderboard', component: LeaderboardView, meta: {logged: true}},
   { path: '/createquiz', component: CreateQuizView, meta: {logged: true}},
   { path: '/editprofile/:id', component: EditProfileView, meta: {logged: true}},
-  { path: '/', redirect: '/welcome' },
+  { path: '/', redirect: '/redirect' },
   {
     path: '/quizquestion/:questionIndex',
     name: 'QuizQuestion',
@@ -43,6 +43,17 @@ router.beforeEach((to, from, next) => {
   const logged = to.matched.some(record => record.meta.logged);
 
   waitForAuthInit().then(() => {
+    
+    if (to.path === '/redirect') {
+      if (isLogged()) {
+        next({path: '/home'});
+        return;
+      } else {
+        next({path: '/welcome'});
+        return;
+      }
+    } 
+
     if (logged && !isLogged()) {
       alert("You need to be logged in to access this page");
       next({path: '/login'});

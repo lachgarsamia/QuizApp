@@ -1,28 +1,26 @@
 <template>
     <NavbarSignedin />
     <div class="profile-container">
-        <router-link :to="`/editprofile/${userid}`" class="edit-profile-btn">Edit Profile</router-link>
         <div class="profile-header">
+            <router-link :to="`/editprofile/${userid}`" class="edit-profile-btn">Edit Profile</router-link>
             <div class="profile-info">
                 <img :src="photoURL" alt="Profile Picture" class="profile-picture" />
                 <div class="profile-details">
-                    <p class="username">{{ username }}</p>
-                    <p class="description">{{ description }}</p>
-                    <div class="categories-container">
-                        <div class="category" v-for="category in categories" :key="category">
-                            {{ category }}
-                        </div>
+                    <div class="flex">
+                        <p class="username">{{ username }}</p>
+                        <font-awesome-icon class="verified" v-if="isAdmin" :icon="['fas', 'certificate']" />
                     </div>
+
+                    <p class="user-email">{{ userEmail }}</p>
+                    <p class="joined-date">Joined on {{ userJoinedDate }}</p>
                 </div>
             </div>
-            <div class="best-standing">
-                <p>Best Standing <span class="standing">#{{ standing }}</span></p>
-                <p>in {{ quiz_title }}</p>
+            <div class="other-info">
+                <p class="description">{{ description }}</p>
             </div>
         </div>
 
         <div class="quizzes-taken">
-            <p class="profile-title">Participated in {{ quizzes_taken.length }} Quizzes</p>
             <div class="quizzes-grid">
                 <div v-for="(quiz, index) in quizzes_taken" :key="index" class="quiz-card">
                     <div class="card-body">
@@ -36,6 +34,7 @@
 </template>
 
 <script>
+import { getUser } from "@/composables/getUser";
 import { app, auth } from "@/firebase/config";
 import { waitForAuthInit } from "@/composables/getUser";
 import { storage } from '@/firebase/config';
@@ -46,13 +45,14 @@ export default {
     data() {
         return {
             username: '',
-            username: '',
             description: '',
             quizzes_taken: [],
             standings: [],
             categories: [''],
             userid: '',
-            photoURL: ''
+            photoURL: '',
+            userJoinedDate: '',
+            isAdmin: false,
         };
     },
     computed: {
@@ -85,24 +85,25 @@ export default {
                 this.userJoinedDate = new Date(user.metadata.creationTime).toLocaleDateString();
                 this.userid = user.uid;
                 this.userEmail = user.email;
-                this.photoURL = await storage.ref(`images/${user.uid}/jester.png`).getDownloadURL();
+                this.photoURL = await storage.ref(`images/${user.uid}/profile.jpg`).getDownloadURL();
             }
         }
     },
-    mounted() {
+    async mounted() {
         waitForAuthInit().then(() => {
             this.fetchData();
         })
+        const user = getUser();
+        const userRole = (await app.collection("users").doc(user.uid).get()).data().role;
+        this.isAdmin = userRole === "admin";
     }
 };
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-
 .profile-container {
     width: 100%;
-    margin: 40px auto;
+    margin: 100px auto;
     padding: 30px;
 }
 
@@ -113,10 +114,13 @@ export default {
     background-color: #F59931;
     color: #FEFEFE;
     text-decoration: none;
-    border-radius: 5px;
+    border-radius: 25px;
     text-align: center;
     font-weight: 500;
     transition: background-color 0.3s, transform 0.3s;
+    position: absolute;
+    top: -20px;
+    right: -20px;
 }
 
 .edit-profile-btn:hover {
@@ -131,88 +135,80 @@ export default {
     color: #343a40;
 }
 
+.flex {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
 .profile-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     border: 10px solid #674BF5;
-    background-color: #fff; 
+    background-color: #fff;
     padding: 30px;
     border-radius: 12px;
     margin-bottom: 20px;
-    max-width: 700px;
+    width: 50%;
+    position: relative;
+}
+.verified {
+    color: #429AF8;
 }
 
 .profile-info {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    flex: 1;
+    width: fit-content;
 }
 
 .profile-details {
-    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 20px;
 }
 
 .profile-picture {
     border-radius: 50%;
-    width: 180px;
-    height: 180px;
+    width: 100px;
+    height: 100px;
     object-fit: cover;
-    transition: transform 0.3s;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
-.profile-picture:hover {
-    transform: scale(1.1);
-}
-
 .username {
-    font-size: 28px;
+    font-size: 1.2em;
     font-weight: bold;
     margin-bottom: 5px;
 }
 
+.user-email {
+    font-size: 0.8em;
+    color: grey;
+    margin-bottom: 5px;
+}
+
+.joined-date {
+    font-size: 0.8em;
+    color: grey;
+    margin-bottom: 5px;
+}
+
+.other-info {
+    flex: 2;
+    margin-left: 20px;
+    position: relative;
+}
+
 .description {
-    font-size: 18px;
-}
-
-.categories-container {
-    text-align: center;
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
-}
-
-.category {
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: bold;
-    background-color: #F59931;
-    color: #FEFEFE;
-    transition: background-color 0.3s, transform 0.3s;
-}
-
-.category:hover {
-    background-color: #EF42BA;
-    transform: translateY(-2px);
-}
-
-.best-standing {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #F59931;
-    padding: 20px;
-    border-radius: 12px;
-    color: #343a40;
-    text-align: center;
-    max-width: 300px;
-}
-
-.best-standing .standing {
-    font-size: 36px;
-    font-weight: bold;
+    font-size: 1em;
+    margin-top: 20px;
+    margin-left: 10px;
+    width: 75%;
+    word-wrap: break-word;
 }
 
 .quizzes-taken {
@@ -226,13 +222,17 @@ export default {
 }
 
 .quiz-card {
-    background: linear-gradient(135deg, #EF42BA, #190976);
+    background: linear-gradient(135deg, #EF42BA, #F59931);
     border: 1px solid #dee2e6;
     border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
     text-align: center;
     transition: transform 0.3s, box-shadow 0.3s;
+    width: 220px;
+    height: 220px;
+    color: #fff;
+    cursor: pointer;
 }
 
 .quiz-card:hover {
@@ -251,5 +251,35 @@ export default {
     font-size: 16px;
     font-weight: bold;
     color: #343a40;
+}
+
+@media (max-width: 800px) {
+    .profile-header {
+        flex-direction: column;
+        width: 100%;
+        /* Stack vertically on smaller screens */
+    }
+
+    .quizzes-taken {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .quizzes-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+    }
+
+    .best-standing {
+        position: static;
+        margin-top: 20px;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .other-info {
+        margin-left: 0;
+    }
 }
 </style>

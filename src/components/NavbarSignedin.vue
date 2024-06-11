@@ -16,14 +16,14 @@
             <button class="browse-btn" @click="search">Browse</button>
         </div>
         <div v-show="!searchbar">
-            <router-link to="/home">Explore</router-link>
+            <router-link to="/home" class="explore-btn">Explore</router-link>
         </div>
         <div class="links">
-            <router-link to="leaderboard/" class="leaderboard-phone"><font-awesome-icon
+            <router-link to="/leaderboard" class="leaderboard-phone"><font-awesome-icon
                     :icon="['fas', 'ranking-star']" /></router-link>
             <router-link class="rm leaderboard-desktop" to="leaderboard/">Standings</router-link>
-            <router-link :to="`profile/${userid}`" class="account-desktop">Account</router-link>
-            <router-link :to="`profile/${userid}`"><font-awesome-icon :icon="['fas', 'user']"
+            <router-link :to="`/profile/${userid}`" class="account-desktop">Account</router-link>
+            <router-link :to="`/profile/${userid}`"><font-awesome-icon :icon="['fas', 'user']"
                     class="account-phone" /></router-link>
         </div>
     </div>
@@ -223,6 +223,26 @@ export default {
     background-color: #ef42ba;
     box-shadow: 0 0 5px rgba(229, 137, 40, 0.5);
 }
+
+.explore-btn {
+    text-decoration: none;
+    font-size: 1.2em;
+    background: linear-gradient(90deg, #EF42BA, #429AF8);
+    padding: 10px 25px;
+    border-radius: 30px;
+    color: #fff;
+    font-weight: 600;
+    outline: 5px solid #735def;
+    border: 2px solid #fff;
+    transition: transform 0.3s ease;
+}
+
+.explore-btn:hover {
+    background: linear-gradient(90deg, #F59931, #EF42BA);
+    transform: scale(1.5);
+    outline: 5px solid #429AF8;
+}
+
 
 .account-desktop {
     text-decoration: none;
