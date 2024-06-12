@@ -68,7 +68,7 @@
 <script>
 import { app } from "@/firebase/config";
 import { getUser } from "@/composables/getUser";
-import  getQuiz  from "@/composables/getQuiz";
+import getQuiz from "@/composables/getQuiz";
 export default {
     name: "EditQuizView",
     data() {
@@ -106,7 +106,6 @@ export default {
             const { quiz, error, load } = getQuiz(this.quizID);
             await load();
             const editquiz = quiz.value;
-            console.log(editquiz);
             this.title = editquiz.title;
             this.category = editquiz.category;
             this.difficulty = editquiz.difficulty;
@@ -175,8 +174,12 @@ export default {
                 }),
                 players: []
             };
-            const Ref = await app.collection('quizzes').add(quizData);
-            const quizID = Ref.id;
+            const quizRef = app.collection('quizzes').doc(this.quizID);
+            async function updateQuiz() {
+                await quizRef.update(quizData);
+            }
+            updateQuiz();
+            const quizID = quizRef.id;
             const author = app.collection('users').doc(uid);
             const user = await author.get();
             const currentQuizzes = (user.data().created_quizzes == null) ? user.data().quizzes : [];

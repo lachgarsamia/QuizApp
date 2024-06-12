@@ -49,6 +49,7 @@
                 <h5 class="quiz-title">{{ quiz.data.title }}</h5>
               </div>
             </router-link>
+            <button class="delete-button" @click="deleteQuiz(index)">×</button>
             <router-link :to="`/edit-quiz/${quiz.id}`" class="edit-link">Edit Quiz</router-link>
           </div>
         </div>
@@ -85,10 +86,9 @@ export default {
     },
     methods: {
         async fetchData() {
-            const user = getUser();
-            console.log("user: ", user.uid);
+            await waitForAuthInit();
+            const user = auth.currentUser;
             const ref = await app.collection('users').doc(user.uid).get();
-            console.log("ref: ",ref);
             if (user) {
                 const actual_user = ref.data();
                 this.username = actual_user.username;
@@ -107,6 +107,7 @@ export default {
                     console.log(error);
                 }
                 const quizzes_taken = actual_user.quizzes_taken;
+                console.log(quizzes_taken);
                 for (const quizID of quizzes_taken) {
                     const quiz = (await app.collection("quizzes").doc(quizID).get()).data();
                     this.quizzes_taken.push({ id: quizID, data: quiz });
@@ -129,8 +130,30 @@ export default {
             });
             this.$router.push('/welcome');
         },
-        async userChanged(user) {
-            this.user = user;
+        async deleteQuiz(idx) {
+            const deletedQuiz = this.created_quizzes[idx];
+            await app.collection('quizzes').doc(deletedQuiz.id).delete();
+
+            // delete quiz from author
+            const author =  app.collection('users').doc(deletedQuiz.data.author);
+            const authorCreatedQuizzes = (await author.get()).data().created_quizzes;
+            const deletedIdx = authorCreatedQuizzes.find((quiz, index) => quiz === deletedQuiz.id);
+            if (deletedIdx !== -1) {
+                authorCreatedQuizzes.splice(deletedIdx, 1);
+                await author.update({ created_quizzes: authorCreatedQuizzes });
+            }
+
+            // delete quiz from users
+            for (const user of deletedQuiz.data.players) {
+                let userRef = app.collection('users').doc(user.id);
+                let userQuizzesTaken = (await userRef.get()).data().quizzes_taken;
+                let deletedIdx = userQuizzesTaken.find((quiz, index) => quiz === deletedQuiz.id);
+                if (deletedIdx !== -1) {
+                    userQuizzesTaken.splice(deletedIdx, 1);
+                    await userRef.update({ quizzes_taken: userQuizzesTaken });
+                }
+            }
+            location.replace(location.href);
         }
     },
     async mounted() {
@@ -288,6 +311,21 @@ export default {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 20px;
+}
+
+.delete-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ef9342;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+    color: #343a40;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .quiz-card {
